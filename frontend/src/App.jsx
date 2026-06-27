@@ -1,34 +1,39 @@
-import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Navbar from "./components/layout/Navbar";
-import Sidebar from "./components/layout/Sidebar";
-import Footer from "./components/layout/Footer";
+import Login from "./pages/Login/Login";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import Employees from "./pages/Employees/Employees";
+import Inventory from "./pages/Inventory/Inventory";
+import Finance from "./pages/Finance/Finance";
+import Projects from "./pages/Projects/Projects";
+import Reports from "./pages/Reports/Reports";
+import Settings from "./pages/Settings/Settings";
 
 function App() {
     return (
-        <div className="app">
+        <BrowserRouter>
 
-            <Navbar />
+            <Routes>
 
-            <div className="main-content">
+                <Route path="/" element={<Login />} />
 
-                <Sidebar />
+                <Route path="/dashboard" element={<Dashboard />} />
 
-                <section className="content">
+                <Route path="/employees" element={<Employees />} />
 
-                    <h1>Dashboard</h1>
+                <Route path="/inventory" element={<Inventory />} />
 
-                    <p>
-                        Welcome to the Enterprise AI-Powered Cloud ERP Suite.
-                    </p>
+                <Route path="/finance" element={<Finance />} />
 
-                </section>
+                <Route path="/projects" element={<Projects />} />
 
-            </div>
+                <Route path="/reports" element={<Reports />} />
 
-            <Footer />
+                <Route path="/settings" element={<Settings />} />
 
-        </div>
+            </Routes>
+
+        </BrowserRouter>
     );
 }
 
