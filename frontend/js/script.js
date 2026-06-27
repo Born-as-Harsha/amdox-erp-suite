@@ -1,13 +1,13 @@
-console.log("Enterprise AI-Powered Cloud ERP Suite Started");
+console.log("ERP Dashboard Loaded Successfully");
 
-const projectName = "Enterprise AI-Powered Cloud ERP Suite";
+const cards = document.querySelectorAll(".card");
 
-console.log(projectName);
+cards.forEach(card => {
 
-const button = document.querySelector("button");
+    card.addEventListener("click", () => {
 
-button.addEventListener("click", () => {
+        alert(card.querySelector("h3").innerText);
 
-    alert("Welcome to the Enterprise AI-Powered Cloud ERP Suite!");
+    });
 
 });
