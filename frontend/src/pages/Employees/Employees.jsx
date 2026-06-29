@@ -49,7 +49,7 @@ function Employees() {
         }
     }
 
-    async function handleDeleteEmployee(employee) {
+    async function handleDeleteEmployee(id) {
         const confirmDelete = window.confirm(
             "Are you sure you want to delete this employee?"
         );
@@ -59,7 +59,7 @@ function Employees() {
         }
 
         try {
-            await deleteEmployeeApi(employee.mongoId);
+            await deleteEmployeeApi(id);
             await loadEmployees();
         } catch (error) {
             console.error(error);
@@ -123,7 +123,10 @@ function Employees() {
             setEditingId("");
         } catch (error) {
             console.error(error);
-            alert("Unable to save employee.");
+            console.log(error.response);
+            console.log(error.response?.data);
+            alert(error.response?.data?.message || error.message);
+            
         }
     }
 
@@ -267,7 +270,7 @@ function Employees() {
                                     <button
                                         className="delete-btn"
                                         onClick={() =>
-                                            handleDeleteEmployee(employee)
+                                            handleDeleteEmployee(employee.mongoId)
                                         }
                                     >
                                         Delete
