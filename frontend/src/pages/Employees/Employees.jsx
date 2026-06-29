@@ -1,43 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Employees.css";
+import {
+    getEmployees,
+    addEmployee,
+    updateEmployee,
+    deleteEmployee as deleteEmployeeApi
+} from "../../api/employeeApi";
 
 function Employees() {
-    const [employees, setEmployees] = useState([
-        {
-            id: "EMP001",
-            name: "Rahul Sharma",
-            department: "Human Resources",
-            designation: "HR Manager",
-            email: "rahul@erp.com",
-            phone: "9876543210",
-            status: "Active"
-        },
-        {
-            id: "EMP002",
-            name: "Priya Reddy",
-            department: "Finance",
-            designation: "Accountant",
-            email: "priya@erp.com",
-            phone: "9876543211",
-            status: "Active"
-        },
-        {
-            id: "EMP003",
-            name: "Arjun Kumar",
-            department: "Inventory",
-            designation: "Store Manager",
-            email: "arjun@erp.com",
-            phone: "9876543212",
-            status: "Leave"
-        }
-    ]);
-
+    const [employees, setEmployees] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState("");
     const [search, setSearch] = useState("");
     const [showForm, setShowForm] = useState(false);
     const [newEmployee, setNewEmployee] = useState({
         id: "",
+        mongoId: "",
         name: "",
         department: "",
         designation: "",
@@ -46,7 +24,32 @@ function Employees() {
         status: "Active"
     });
 
-    function deleteEmployee(id) {
+    useEffect(() => {
+        loadEmployees();
+    }, []);
+
+    async function loadEmployees() {
+        try {
+            const response = await getEmployees();
+
+            const formattedEmployees = response.data.map((employee) => ({
+                id: employee.employeeId,
+                mongoId: employee._id,
+                name: employee.name,
+                department: employee.department,
+                designation: employee.designation,
+                email: employee.email,
+                phone: employee.phone,
+                status: employee.status
+            }));
+
+            setEmployees(formattedEmployees);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function handleDeleteEmployee(employee) {
         const confirmDelete = window.confirm(
             "Are you sure you want to delete this employee?"
         );
@@ -55,13 +58,16 @@ function Employees() {
             return;
         }
 
-        const updatedEmployees = employees.filter(
-            (employee) => employee.id !== id
-        );
-        setEmployees(updatedEmployees);
+        try {
+            await deleteEmployeeApi(employee.mongoId);
+            await loadEmployees();
+        } catch (error) {
+            console.error(error);
+            alert("Unable to delete employee.");
+        }
     }
 
-    function handleSaveEmployee(e) {
+    async function handleSaveEmployee(e) {
         e.preventDefault();
 
         if (
@@ -76,41 +82,54 @@ function Employees() {
             return;
         }
 
-        if (isEditing) {
-            const updatedEmployees = employees.map((employee) =>
-                employee.id === editingId ? newEmployee : employee
-            );
-            setEmployees(updatedEmployees);
-            setIsEditing(false);
-            setEditingId("");
-        } else {
-            const employeeExists = employees.some(
-                (employee) => employee.id === newEmployee.id
-            );
-
-            if (employeeExists) {
-                alert("Employee ID already exists.");
-                return;
+        try {
+            if (isEditing) {
+                await updateEmployee(editingId, {
+                    employeeId: newEmployee.id,
+                    name: newEmployee.name,
+                    department: newEmployee.department,
+                    designation: newEmployee.designation,
+                    email: newEmployee.email,
+                    phone: newEmployee.phone,
+                    status: newEmployee.status
+                });
+            } else {
+                await addEmployee({
+                    employeeId: newEmployee.id,
+                    name: newEmployee.name,
+                    department: newEmployee.department,
+                    designation: newEmployee.designation,
+                    email: newEmployee.email,
+                    phone: newEmployee.phone,
+                    status: newEmployee.status
+                });
             }
 
-            setEmployees([...employees, newEmployee]);
-        }
+            await loadEmployees();
 
-        setNewEmployee({
-            id: "",
-            name: "",
-            department: "",
-            designation: "",
-            email: "",
-            phone: "",
-            status: "Active"
-        });
-        setShowForm(false);
+            setNewEmployee({
+                id: "",
+                mongoId: "",
+                name: "",
+                department: "",
+                designation: "",
+                email: "",
+                phone: "",
+                status: "Active"
+            });
+
+            setShowForm(false);
+            setIsEditing(false);
+            setEditingId("");
+        } catch (error) {
+            console.error(error);
+            alert("Unable to save employee.");
+        }
     }
 
     function handleEditEmployee(employee) {
         setIsEditing(true);
-        setEditingId(employee.id);
+        setEditingId(employee.mongoId);
         setNewEmployee({ ...employee });
         setShowForm(true);
     }
@@ -120,6 +139,7 @@ function Employees() {
         setEditingId("");
         setNewEmployee({
             id: "",
+            mongoId: "",
             name: "",
             department: "",
             designation: "",
@@ -135,6 +155,7 @@ function Employees() {
         setEditingId("");
         setNewEmployee({
             id: "",
+            mongoId: "",
             name: "",
             department: "",
             designation: "",
@@ -216,7 +237,7 @@ function Employees() {
                 <tbody>
                     {filteredEmployees.length > 0 ? (
                         filteredEmployees.map((employee) => (
-                            <tr key={employee.id}>
+                            <tr key={employee.mongoId}>
                                 <td>{employee.id}</td>
                                 <td>{employee.name}</td>
                                 <td>{employee.department}</td>
@@ -246,7 +267,7 @@ function Employees() {
                                     <button
                                         className="delete-btn"
                                         onClick={() =>
-                                            deleteEmployee(employee.id)
+                                            handleDeleteEmployee(employee)
                                         }
                                     >
                                         Delete
