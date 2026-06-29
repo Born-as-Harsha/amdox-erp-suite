@@ -4,10 +4,13 @@ import {
     getEmployees,
     createEmployee,
     updateEmployee,
-    deleteEmployee
+    deleteEmployee,
+    getEmployeeStats
 } from "../controllers/employeeController.js";
 
 const router = express.Router();
+
+router.get("/stats", getEmployeeStats);
 
 router.get("/", getEmployees);
 

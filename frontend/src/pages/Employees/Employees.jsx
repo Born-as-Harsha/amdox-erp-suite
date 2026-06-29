@@ -4,10 +4,17 @@ import {
     getEmployees,
     addEmployee,
     updateEmployee,
-    deleteEmployee as deleteEmployeeApi
+    deleteEmployee as deleteEmployeeApi,
+    getEmployeeStats
 } from "../../api/employeeApi";
 
 function Employees() {
+    const [stats, setStats] = useState({
+    totalEmployees: 0,
+    activeEmployees: 0,
+    leaveEmployees: 0,
+    departments: 0
+});
     const [employees, setEmployees] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState("");
@@ -26,8 +33,24 @@ function Employees() {
 
     useEffect(() => {
         loadEmployees();
+        loadStats();
     }, []);
 
+    async function loadStats() {
+
+    try {
+
+        const response = await getEmployeeStats();
+
+        setStats(response.data);
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+}
     async function loadEmployees() {
         try {
             const response = await getEmployees();
@@ -106,6 +129,7 @@ function Employees() {
             }
 
             await loadEmployees();
+            await loadStats();
 
             setNewEmployee({
                 id: "",
@@ -206,19 +230,19 @@ function Employees() {
             <div className="employee-stats">
                 <div className="stat-card">
                     <h3>Total Employees</h3>
-                    <p>{totalEmployees}</p>
+                    <p>{stats.totalEmployees}</p>
                 </div>
                 <div className="stat-card">
                     <h3>Departments</h3>
-                    <p>{departments}</p>
+                    <p>{stats.departments}</p>
                 </div>
                 <div className="stat-card">
                     <h3>Active Employees</h3>
-                    <p>{activeEmployees}</p>
+                    <p>{stats.activeEmployees}</p>
                 </div>
                 <div className="stat-card">
                     <h3>On Leave</h3>
-                    <p>{leaveEmployees}</p>
+                    <p>{stats.leaveEmployees}</p>
                 </div>
             </div>
 
