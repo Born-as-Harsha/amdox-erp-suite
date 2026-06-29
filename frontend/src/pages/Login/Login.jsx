@@ -1,12 +1,62 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../services/authService";
 
 function Login() {
 
     const navigate = useNavigate();
 
-    function handleLogin() {
+    const [email, setEmail] = useState("");
 
-        navigate("/dashboard");
+    const [password, setPassword] = useState("");
+
+    async function handleLogin(e) {
+
+        e.preventDefault();
+
+        try {
+
+            const data = await login({
+
+                email,
+
+                password
+
+            });
+
+            localStorage.setItem(
+
+                "token",
+
+                data.token
+
+            );
+
+            localStorage.setItem(
+
+                "user",
+
+                JSON.stringify(data)
+
+            );
+
+            alert("Login Successful");
+
+            navigate("/dashboard");
+
+        }
+
+        catch (error) {
+
+            alert(
+
+                error.response?.data?.message ||
+
+                error.message
+
+            );
+
+        }
 
     }
 
@@ -34,40 +84,48 @@ function Login() {
 
                 <h2>ERP Login</h2>
 
-                <input
-                    type="email"
-                    placeholder="Email"
-                    style={{
-                        width: "100%",
-                        padding: "10px",
-                        marginTop: "20px"
-                    }}
-                />
+                <form onSubmit={handleLogin}>
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    style={{
-                        width: "100%",
-                        padding: "10px",
-                        marginTop: "15px"
-                    }}
-                />
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        style={{
+                            width: "100%",
+                            padding: "10px",
+                            marginTop: "20px"
+                        }}
+                    />
 
-                <button
-                    onClick={handleLogin}
-                    style={{
-                        width: "100%",
-                        marginTop: "20px",
-                        padding: "12px",
-                        background: "#0d6efd",
-                        color: "white",
-                        border: "none",
-                        cursor: "pointer"
-                    }}
-                >
-                    Login
-                </button>
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        style={{
+                            width: "100%",
+                            padding: "10px",
+                            marginTop: "15px"
+                        }}
+                    />
+
+                    <button
+                        type="submit"
+                        style={{
+                            width: "100%",
+                            marginTop: "20px",
+                            padding: "12px",
+                            background: "#0d6efd",
+                            color: "white",
+                            border: "none",
+                            cursor: "pointer"
+                        }}
+                    >
+                        Login
+                    </button>
+
+                </form>
 
             </div>
 

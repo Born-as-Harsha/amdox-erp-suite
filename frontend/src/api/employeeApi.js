@@ -4,17 +4,52 @@ const API = axios.create({
     baseURL: "http://localhost:5000/api"
 });
 
-// Get all employees
-export const getEmployees = () => API.get("/employees");
+// Automatically attach JWT token
+API.interceptors.request.use((config) => {
 
-// Add employee
+    const token = localStorage.getItem("token");
+
+    if (token) {
+
+        config.headers.Authorization = `Bearer ${token}`;
+
+    }
+
+    return config;
+
+});
+
+// ======================
+// GET ALL EMPLOYEES
+// ======================
+
+export const getEmployees = () =>
+    API.get("/employees");
+
+// ======================
+// GET EMPLOYEE STATS
+// ======================
+
+export const getEmployeeStats = () =>
+    API.get("/employees/stats");
+
+// ======================
+// ADD EMPLOYEE
+// ======================
+
 export const addEmployee = (employee) =>
     API.post("/employees", employee);
 
-// Update employee
+// ======================
+// UPDATE EMPLOYEE
+// ======================
+
 export const updateEmployee = (id, employee) =>
     API.put(`/employees/${id}`, employee);
 
-// Delete employee
+// ======================
+// DELETE EMPLOYEE
+// ======================
+
 export const deleteEmployee = (id) =>
     API.delete(`/employees/${id}`);
