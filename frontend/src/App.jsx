@@ -8,6 +8,7 @@ import Finance from "./pages/Finance/Finance";
 import Projects from "./pages/Projects/Projects";
 import Reports from "./pages/Reports/Reports";
 import Settings from "./pages/Settings/Settings";
+import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -37,7 +38,9 @@ function App() {
                     path="/employees"
                     element={
                         <ProtectedRoute>
-                            <Employees />
+                            <RoleProtectedRoute allowedRoles={["Admin", "HR"]}>
+                                <Employees />
+                            </RoleProtectedRoute>
                         </ProtectedRoute>
                     }
                 />
@@ -46,7 +49,9 @@ function App() {
                     path="/inventory"
                     element={
                         <ProtectedRoute>
-                            <Inventory />
+                            <RoleProtectedRoute allowedRoles={["Admin"]}>
+                                <Inventory />
+                            </RoleProtectedRoute>
                         </ProtectedRoute>
                     }
                 />
@@ -55,7 +60,9 @@ function App() {
                     path="/finance"
                     element={
                         <ProtectedRoute>
-                            <Finance />
+                            <RoleProtectedRoute allowedRoles={["Admin"]}>
+                                <Finance />
+                            </RoleProtectedRoute>
                         </ProtectedRoute>
                     }
                 />
@@ -64,7 +71,9 @@ function App() {
                     path="/projects"
                     element={
                         <ProtectedRoute>
-                            <Projects />
+                            <RoleProtectedRoute allowedRoles={["Admin"]}>
+                                <Projects />
+                            </RoleProtectedRoute>
                         </ProtectedRoute>
                     }
                 />
@@ -73,7 +82,9 @@ function App() {
                     path="/reports"
                     element={
                         <ProtectedRoute>
-                            <Reports />
+                            <RoleProtectedRoute allowedRoles={["Admin"]}>
+                                <Reports />
+                            </RoleProtectedRoute>
                         </ProtectedRoute>
                     }
                 />
@@ -82,7 +93,9 @@ function App() {
                     path="/settings"
                     element={
                         <ProtectedRoute>
-                            <Settings />
+                            <RoleProtectedRoute allowedRoles={["Admin"]}>
+                                <Settings />
+                            </RoleProtectedRoute>
                         </ProtectedRoute>
                     }
                 />

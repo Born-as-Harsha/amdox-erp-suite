@@ -4,6 +4,10 @@ function Sidebar() {
 
     const navigate = useNavigate();
 
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const role = user?.role;
+
     function handleLogout() {
 
         localStorage.removeItem("token");
@@ -23,19 +27,57 @@ function Sidebar() {
 
             <ul>
 
-                <li><NavLink to="/dashboard">Dashboard</NavLink></li>
+                <li>
+                    <NavLink to="/dashboard">
+                        Dashboard
+                    </NavLink>
+                </li>
 
-                <li><NavLink to="/employees">Employees</NavLink></li>
+                {(role === "Admin" || role === "HR") && (
 
-                <li><NavLink to="/inventory">Inventory</NavLink></li>
+                    <li>
+                        <NavLink to="/employees">
+                            Employees
+                        </NavLink>
+                    </li>
 
-                <li><NavLink to="/finance">Finance</NavLink></li>
+                )}
 
-                <li><NavLink to="/projects">Projects</NavLink></li>
+                {role === "Admin" && (
 
-                <li><NavLink to="/reports">Reports</NavLink></li>
+                    <>
+                        <li>
+                            <NavLink to="/inventory">
+                                Inventory
+                            </NavLink>
+                        </li>
 
-                <li><NavLink to="/settings">Settings</NavLink></li>
+                        <li>
+                            <NavLink to="/finance">
+                                Finance
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink to="/projects">
+                                Projects
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink to="/reports">
+                                Reports
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink to="/settings">
+                                Settings
+                            </NavLink>
+                        </li>
+                    </>
+
+                )}
 
                 <li>
 
