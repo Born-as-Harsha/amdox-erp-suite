@@ -1,8 +1,23 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 function Sidebar() {
+
+    const navigate = useNavigate();
+
+    function handleLogout() {
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        alert("Logged out successfully");
+
+        navigate("/");
+
+    }
+
     return (
-        <aside className="sidebar">
+
+        <div className="sidebar">
 
             <h2>ERP Menu</h2>
 
@@ -22,12 +37,30 @@ function Sidebar() {
 
                 <li><NavLink to="/settings">Settings</NavLink></li>
 
-                <li><NavLink to="/">Logout</NavLink></li>
+                <li>
+
+                    <button
+                        onClick={handleLogout}
+                        style={{
+                            background: "none",
+                            border: "none",
+                            color: "#0d6efd",
+                            cursor: "pointer",
+                            fontSize: "16px",
+                            padding: "0"
+                        }}
+                    >
+                        Logout
+                    </button>
+
+                </li>
 
             </ul>
 
-        </aside>
+        </div>
+
     );
+
 }
 
 export default Sidebar;
