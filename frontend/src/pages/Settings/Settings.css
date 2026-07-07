@@ -1,0 +1,63 @@
+.settings{
+
+    max-width:600px;
+
+    margin:30px auto;
+
+    background:#fff;
+
+    padding:30px;
+
+    border-radius:10px;
+
+    box-shadow:0 0 10px rgba(0,0,0,.1);
+
+}
+
+.settings h1{
+
+    margin-bottom:20px;
+
+}
+
+.settings form{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:15px;
+
+}
+
+.settings input{
+
+    padding:10px;
+
+    border:1px solid #ccc;
+
+    border-radius:6px;
+
+}
+
+.settings button{
+
+    padding:12px;
+
+    border:none;
+
+    background:#2563eb;
+
+    color:white;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+}
+
+.settings button:hover{
+
+    background:#1d4ed8;
+
+}

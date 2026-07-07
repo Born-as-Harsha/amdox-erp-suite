@@ -8,6 +8,7 @@ import inventoryRoutes from "./routes/inventoryRoutes.js";
 import financeRoutes from "./routes/financeRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import settingRoutes from "./routes/settingRoutes.js";
 dotenv.config();
 
 connectDB();
@@ -23,6 +24,8 @@ app.use("/api/inventory", inventoryRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/settings", settingRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 
