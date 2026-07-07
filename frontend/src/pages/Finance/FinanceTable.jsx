@@ -1,77 +1,154 @@
-function ProjectTable({
-    projects,
-    handleEdit,
-    handleDelete
+function FinanceTable({
+    transactions,
+    onEdit,
+    onDelete
+    
 }) {
+
     return (
-        <>
-            <h2 className="table-title">
-                Recent Projects
-            </h2>
 
-            <table>
-                <thead>
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Title</th>
+
+                    <th>Type</th>
+
+                    <th>Amount</th>
+
+                    <th>Category</th>
+
+                    <th>Date</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {transactions.length === 0 ? (
+
                     <tr>
-                        <th>ID</th>
-                        <th>Project Name</th>
-                        <th>Manager</th>
-                        <th>Budget</th>
-                        <th>Client</th>
-                        <th>Deadline</th>
-                        <th>Action</th>
+
+                        <td
+                            colSpan="7"
+                            style={{
+                                textAlign: "center",
+                                padding: "20px"
+                            }}
+                        >
+
+                            No Transactions Found
+
+                        </td>
+
                     </tr>
-                </thead>
 
-                <tbody>
-                    {
-                        projects.length === 0 ? (
-                            <tr>
-                                <td colSpan="7">
-                                    No Projects Found
-                                </td>
-                            </tr>
-                        ) : (
-                            projects.map((project) => (
-                                <tr key={project._id}>
-                                    <td>{project.projectId}</td>
-                                    <td>{project.projectName}</td>
-                                    <td>{project.manager}</td>
-                                    <td>₹{project.budget}</td>
-                                    <td>{project.client}</td>
-                                    <td>
-                                        {
-                                            new Date(
-                                                project.deadline
-                                            ).toLocaleDateString()
-                                        }
-                                    </td>
-                                    <td>
-                                        <button
-                                            className="edit-btn"
-                                            onClick={() =>
-                                                handleEdit(project)
-                                            }
-                                        >
-                                            Edit
-                                        </button>
+                ) : (
 
-                                        <button
-                                            className="delete-btn"
-                                            onClick={() =>
-                                                handleDelete(project._id)
-                                            }
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )
-                    }
-                </tbody>
-            </table>
-        </>
+                    transactions.map((transaction) => (
+
+                        <tr key={transaction._id}>
+
+                            <td>
+
+                                {transaction.transactionId}
+
+                            </td>
+
+                            <td>
+
+                                {transaction.title}
+
+                            </td>
+
+                            <td>
+
+                                {transaction.type}
+
+                            </td>
+
+                            <td>
+
+                                ₹{transaction.amount}
+
+                            </td>
+
+                            <td>
+
+                                {transaction.category}
+
+                            </td>
+
+                            <td>
+
+                                {
+
+                                    new Date(
+
+                                        transaction.date
+
+                                    ).toLocaleDateString()
+
+                                }
+
+                            </td>
+
+                            <td>
+
+                                <button
+
+                                    className="edit-btn"
+
+                                    onClick={() =>
+
+                                        onEdit(transaction)
+
+                                    }
+
+                                >
+
+                                    Edit
+
+                                </button>
+
+                                <button
+
+                                    className="delete-btn"
+
+                                    onClick={() =>
+
+                                        onDelete(transaction._id)
+
+                                    }
+
+                                >
+
+                                    Delete
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                    ))
+
+                )}
+
+            </tbody>
+
+        </table>
+
     );
+
 }
 
-export default ProjectTable;
+export default FinanceTable;

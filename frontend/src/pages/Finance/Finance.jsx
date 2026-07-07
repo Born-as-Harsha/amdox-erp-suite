@@ -9,8 +9,6 @@ import {
     getFinanceStats
 } from "../../api/financeApi";
 
-import Modal from "../../components/common/Modal";
-
 import FinanceTable from "./FinanceTable";
 import FinanceStats from "./FinanceStats";
 import SearchBar from "./SearchBar";
@@ -69,7 +67,7 @@ function Finance() {
         }
     }
 
-    const fetchStats = async () => {
+    async function fetchStats() {
         try {
             const res = await getFinanceStats();
             const data = res?.data || res || {};
@@ -79,12 +77,13 @@ function Finance() {
             setStats({});
             throw error;
         }
-    };
+    }
 
     const resetForm = () => {
         setFormData(initialFormState);
         setEditingId(null);
         setSelectedTransaction(null);
+        setError("");
     };
 
     const handleOpenAddModal = () => {
@@ -247,34 +246,38 @@ function Finance() {
         });
     }, [transactions, searchTerm]);
 
-    const fallbackStats = useMemo(() => {
-        const totalRevenue =
-            stats?.totalRevenue ??
-            transactions
-                .filter((item) => item?.type === "Revenue" || item?.type === "Income")
-                .reduce((sum, item) => sum + Number(item?.amount || 0), 0);
-
-        const totalExpenses =
-            stats?.totalExpenses ??
-            transactions
-                .filter((item) => item?.type === "Expense")
-                .reduce((sum, item) => sum + Number(item?.amount || 0), 0);
-
-        const profit = stats?.profit ?? totalRevenue - totalExpenses;
-        const totalTransactions = stats?.totalTransactions ?? transactions.length;
-
+    const financeStats = useMemo(() => {
         return {
-            totalRevenue,
-            totalExpenses,
-            profit,
-            totalTransactions
+            totalIncome:
+                stats.totalIncome ??
+                transactions
+                    .filter((t) => t.type === "Income")
+                    .reduce((sum, t) => sum + Number(t.amount || 0), 0),
+
+            totalExpense:
+                stats.totalExpense ??
+                transactions
+                    .filter((t) => t.type === "Expense")
+                    .reduce((sum, t) => sum + Number(t.amount || 0), 0),
+
+            balance:
+                stats.balance ??
+                (
+                    transactions
+                        .filter((t) => t.type === "Income")
+                        .reduce((sum, t) => sum + Number(t.amount || 0), 0) -
+                    transactions
+                        .filter((t) => t.type === "Expense")
+                        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+                )
         };
     }, [stats, transactions]);
+
     if (loading) {
         return (
-             <h2 style={{ padding: "20px" }}>
-                 Loading...
-             </h2>
+            <h2 style={{ padding: "20px" }}>
+                Loading...
+            </h2>
         );
     }
 
@@ -294,40 +297,19 @@ function Finance() {
 
             {error && <p className="finance-error">{error}</p>}
 
-            <div className="finance-stats">
-                <FinanceStats
-                    stats={fallbackStats}
-                    transactions={transactions}
-                />
-            </div>
+            <FinanceStats
+                stats={financeStats}
+                transactions={transactions}
+            />
 
             <h2 className="table-title">Recent Transactions</h2>
 
-            {loading ? (
-                <p>Loading...</p>
-            ) : (
-                <FinanceTable
-                    transactions={filteredTransactions}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onView={handleView}
-                />
-            )}
-
-            <Modal isOpen={showModal} onClose={handleCloseModal}>
-                <FinanceModal
-                    showModal={showModal}
-                    setShowModal={setShowModal}
-                    formData={formData}
-                    setFormData={setFormData}
-                    handleSave={handleSave}
-                    editingId={editingId}
-                    onSubmit={handleSubmit}
-                    onClose={handleCloseModal}
-                    selectedTransaction={selectedTransaction}
-                    loading={submitting}
-                />
-            </Modal>
+            <FinanceTable
+                transactions={filteredTransactions}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onView={handleView}
+            />
 
             {!loading && filteredTransactions.length === 0 && (
                 <div className="finance-empty-state">
@@ -335,29 +317,17 @@ function Finance() {
                 </div>
             )}
 
-            {!loading && transactions.length > 0 && (
-                <div className="finance-summary">
-                    <div className="summary-row">
-                        <span>Filtered Results</span>
-                        <strong>{filteredTransactions.length}</strong>
-                    </div>
-
-                    <div className="summary-row">
-                        <span>Total Records</span>
-                        <strong>{transactions.length}</strong>
-                    </div>
-
-                    <div className="summary-row">
-                        <span>Modal Status</span>
-                        <strong>{showModal ? "Open" : "Closed"}</strong>
-                    </div>
-
-                    <div className="summary-row">
-                        <span>Mode</span>
-                        <strong>{editingId ? "Edit" : "Add"}</strong>
-                    </div>
-                </div>
-            )}
+            <FinanceModal
+                showModal={showModal}
+                setShowModal={setShowModal}
+                onClose={handleCloseModal}
+                formData={formData}
+                setFormData={setFormData}
+                handleSave={handleSubmit}
+                editingId={editingId}
+                submitting={submitting}
+                selectedTransaction={selectedTransaction}
+            />
         </div>
     );
 }

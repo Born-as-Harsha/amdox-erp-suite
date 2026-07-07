@@ -1,3 +1,4 @@
+import "./Login.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../services/authService";
@@ -10,9 +11,13 @@ function Login() {
 
     const [password, setPassword] = useState("");
 
+    const [loading, setLoading] = useState(false);
+
     async function handleLogin(e) {
 
         e.preventDefault();
+
+        setLoading(true);
 
         try {
 
@@ -24,13 +29,7 @@ function Login() {
 
             });
 
-            localStorage.setItem(
-
-                "token",
-
-                data.token
-
-            );
+            localStorage.setItem("token", data.token);
 
             localStorage.setItem(
 
@@ -39,8 +38,6 @@ function Login() {
                 JSON.stringify(data)
 
             );
-
-            alert("Login Successful");
 
             navigate("/dashboard");
 
@@ -58,74 +55,117 @@ function Login() {
 
         }
 
+        finally{
+
+            setLoading(false);
+
+        }
+
     }
 
     return (
 
-        <div
-            style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100vh",
-                background: "#f4f6f9"
-            }}
-        >
+        <div className="login-page">
 
-            <div
-                style={{
-                    background: "white",
-                    padding: "40px",
-                    borderRadius: "10px",
-                    width: "350px",
-                    boxShadow: "0 2px 10px rgba(0,0,0,.2)"
-                }}
-            >
+            <div className="login-card">
 
-                <h2>ERP Login</h2>
+                <div className="company-logo">
+
+                    A
+
+                </div>
+
+                <h1 className="company-title">
+
+                    AMADOX TECHNOLOGIES
+
+                </h1>
+
+                <p className="company-subtitle">
+
+                    Enterprise AI-Powered Cloud ERP Suite
+
+                </p>
+
+                <h2>
+
+                    Secure Login
+
+                </h2>
 
                 <form onSubmit={handleLogin}>
 
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        style={{
-                            width: "100%",
-                            padding: "10px",
-                            marginTop: "20px"
-                        }}
-                    />
+                    <div className="form-group">
 
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        style={{
-                            width: "100%",
-                            padding: "10px",
-                            marginTop: "15px"
-                        }}
-                    />
+                        <label>Email Address</label>
+
+                        <input
+
+                            type="email"
+
+                            value={email}
+
+                            onChange={(e)=>setEmail(e.target.value)}
+
+                            placeholder="Enter your email"
+
+                            required
+
+                        />
+
+                    </div>
+
+                    <div className="form-group">
+
+                        <label>Password</label>
+
+                        <input
+
+                            type="password"
+
+                            value={password}
+
+                            onChange={(e)=>setPassword(e.target.value)}
+
+                            placeholder="Enter your password"
+
+                            required
+
+                        />
+
+                    </div>
 
                     <button
-                        type="submit"
-                        style={{
-                            width: "100%",
-                            marginTop: "20px",
-                            padding: "12px",
-                            background: "#0d6efd",
-                            color: "white",
-                            border: "none",
-                            cursor: "pointer"
-                        }}
+
+                        className="login-btn"
+
+                        disabled={loading}
+
                     >
-                        Login
+
+                        {
+
+                            loading
+
+                            ?
+
+                            "Signing In..."
+
+                            :
+
+                            "Login"
+
+                        }
+
                     </button>
 
                 </form>
+
+                <p className="footer-text">
+
+                    © 2026 Amadox Technologies Pvt. Ltd.
+
+                </p>
 
             </div>
 
