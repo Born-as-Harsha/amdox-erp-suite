@@ -7,7 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import financeRoutes from "./routes/financeRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
-
+import reportRoutes from "./routes/reportRoutes.js";
 dotenv.config();
 
 connectDB();
@@ -22,6 +22,7 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/reports", reportRoutes);
 
 const PORT = process.env.PORT || 5000;
 

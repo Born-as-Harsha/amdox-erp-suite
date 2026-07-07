@@ -1,9 +1,9 @@
-function ProjectStats({ stats = {}, projects = [] }) {
+function ReportStats({ stats = {}, reports = [] }) {
     return (
-        <div className="project-stats">
+        <div className="report-stats">
             <div className="stat-card">
-                <h3>Total Projects</h3>
-                <p>{stats.totalProjects || projects.length || 0}</p>
+                <h3>Total Reports</h3>
+                <p>{stats.totalReports || reports.length || 0}</p>
             </div>
 
             <div className="stat-card">
@@ -24,4 +24,4 @@ function ProjectStats({ stats = {}, projects = [] }) {
     );
 }
 
-export default ProjectStats;
+export default ReportStats;

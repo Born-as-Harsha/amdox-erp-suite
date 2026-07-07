@@ -1,138 +1,152 @@
 import "./Projects.css";
+import { useState } from "react";
+
+import ProjectTable from "./ProjectTable";
+import ProjectStats from "./ProjectStats";
+import SearchBar from "./SearchBar";
+import ProjectModal from "./ProjectModal";
 
 function Projects() {
-
-    const projects = [
+    const [projects, setProjects] = useState([
         {
-            id: "PRJ001",
-            name: "ERP Development",
+            _id: "1",
+            projectId: "PRJ001",
+            projectName: "ERP Development",
             manager: "Rahul Sharma",
-            progress: "80%",
-            deadline: "15 Jul 2026",
+            budget: 500000,
+            client: "ABC Pvt Ltd",
+            deadline: "2026-07-15",
+            description: "ERP system development project",
             status: "In Progress"
         },
         {
-            id: "PRJ002",
-            name: "HR Portal",
+            _id: "2",
+            projectId: "PRJ002",
+            projectName: "HR Portal",
             manager: "Priya Reddy",
-            progress: "100%",
-            deadline: "10 Jun 2026",
+            budget: 300000,
+            client: "XYZ Solutions",
+            deadline: "2026-06-10",
+            description: "HR portal implementation",
             status: "Completed"
         },
         {
-            id: "PRJ003",
-            name: "Inventory Upgrade",
+            _id: "3",
+            projectId: "PRJ003",
+            projectName: "Inventory Upgrade",
             manager: "Arjun Kumar",
-            progress: "30%",
-            deadline: "30 Jul 2026",
-            status: "Pending"
+            budget: 200000,
+            client: "Global Traders",
+            deadline: "2026-07-30",
+            description: "Inventory system upgrade",
+            status: "Planning"
         }
-    ];
+    ]);
+
+    const [showModal, setShowModal] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const [formData, setFormData] = useState({
+        projectId: "",
+        projectName: "",
+        manager: "",
+        budget: "",
+        client: "",
+        deadline: "",
+        description: "",
+        status: "Planning"
+    });
+
+    const stats = {
+        totalProjects: projects.length,
+        planning: projects.filter((project) => project.status === "Planning").length,
+        inProgress: projects.filter((project) => project.status === "In Progress").length,
+        completed: projects.filter((project) => project.status === "Completed").length
+    };
+
+    const filteredProjects = projects.filter((project) =>
+        project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.manager.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.projectId.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleEdit = (project) => {
+        setEditingId(project._id);
+        setFormData(project);
+        setShowModal(true);
+    };
+
+    const handleDelete = (id) => {
+        setProjects(projects.filter((project) => project._id !== id));
+    };
+
+    const handleSave = () => {
+        if (editingId) {
+            setProjects(
+                projects.map((project) =>
+                    project._id === editingId
+                        ? { ...project, ...formData }
+                        : project
+                )
+            );
+        } else {
+            const newProject = {
+                _id: Date.now().toString(),
+                ...formData
+            };
+            setProjects([...projects, newProject]);
+        }
+
+        setFormData({
+            projectId: "",
+            projectName: "",
+            manager: "",
+            budget: "",
+            client: "",
+            deadline: "",
+            description: "",
+            status: "Planning"
+        });
+
+        setEditingId(null);
+        setShowModal(false);
+    };
 
     return (
         <div className="projects">
-
             <div className="projects-header">
                 <h1>Project Management</h1>
-                <button>Add Project</button>
+                <button onClick={() => setShowModal(true)}>Add Project</button>
             </div>
 
-            <div className="search-box">
-                <input
-                    type="text"
-                    placeholder="Search Project..."
-                />
-            </div>
+            <SearchBar
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+            />
 
-            <div className="project-stats">
+            <ProjectStats
+                stats={stats}
+                projects={projects}
+            />
 
-                <div className="stat-card">
-                    <h3>Total Projects</h3>
-                    <p>16</p>
-                </div>
+            <ProjectTable
+                projects={filteredProjects}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+            />
 
-                <div className="stat-card">
-                    <h3>Completed</h3>
-                    <p>8</p>
-                </div>
-
-                <div className="stat-card">
-                    <h3>In Progress</h3>
-                    <p>5</p>
-                </div>
-
-                <div className="stat-card">
-                    <h3>Pending</h3>
-                    <p>3</p>
-                </div>
-
-            </div>
-
-            <h2 className="table-title">Project List</h2>
-
-            <table>
-
-                <thead>
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Project</th>
-                        <th>Manager</th>
-                        <th>Progress</th>
-                        <th>Deadline</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {projects.map((project) => (
-
-                        <tr key={project.id}>
-
-                            <td>{project.id}</td>
-                            <td>{project.name}</td>
-                            <td>{project.manager}</td>
-                            <td>{project.progress}</td>
-                            <td>{project.deadline}</td>
-
-                            <td>
-
-                                <span
-                                    className={
-                                        project.status === "Completed"
-                                            ? "status completed"
-                                            : project.status === "In Progress"
-                                            ? "status progress"
-                                            : "status pending"
-                                    }
-                                >
-                                    {project.status}
-                                </span>
-
-                            </td>
-
-                            <td>
-
-                                <button className="edit-btn">Edit</button>
-
-                                <button className="delete-btn">Delete</button>
-
-                            </td>
-
-                        </tr>
-
-                    ))}
-
-                </tbody>
-
-            </table>
-
+            <ProjectModal
+                showModal={showModal}
+                setShowModal={setShowModal}
+                formData={formData}
+                setFormData={setFormData}
+                handleSave={handleSave}
+                editingId={editingId}
+            />
         </div>
     );
-
 }
 
 export default Projects;
