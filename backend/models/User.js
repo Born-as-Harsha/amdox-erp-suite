@@ -7,6 +7,11 @@ const userSchema = new mongoose.Schema(
             required: true,
             unique: true
         },
+        username: {
+            type: String,
+            required: true,
+            unique: true
+        },
         name: {
             type: String,
             required: true
@@ -49,7 +54,25 @@ const userSchema = new mongoose.Schema(
             enum: ["Active", "Inactive"],
             default: "Active"
         },
+        emailVerified: {
+            type: Boolean,
+            default: false
+        },
+        otpVerified: {
+            type: Boolean,
+            default: false
+        },
+        otpCode: {
+            type: String,
+            default: ""
+        },
+        otpExpires: {
+            type: Date
+        },
         lastLogin: {
+            type: Date
+        },
+        lastLogout: {
             type: Date
         },
         rememberMeToken: {
@@ -66,6 +89,22 @@ const userSchema = new mongoose.Schema(
         },
         resetPasswordExpires: {
             type: Date
+        },
+        createdBy: {
+            type: String,
+            default: "System"
+        },
+        updatedBy: {
+            type: String,
+            default: "System"
+        },
+        loginAttempts: {
+            type: Number,
+            default: 0
+        },
+        accountLocked: {
+            type: Boolean,
+            default: false
         },
         // Profile Settings preferences
         address: {

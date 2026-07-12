@@ -192,7 +192,7 @@ function UserManagement() {
     };
 
     // Unique Roles options list
-    const roleOptions = ["All", "Super Admin", "Admin", "HR", "Finance Manager", "Inventory Manager", "Project Manager", "Executive"];
+    const roleOptions = ["All", "Super Admin", "Admin", "HR Manager", "HR Executive", "Finance Manager", "Accountant", "Inventory Manager", "Store Keeper", "Project Manager", "Project Lead", "Employee", "Executive", "Viewer"];
 
     // Search, Filter, Sort processing
     const filteredUsers = useMemo(() => {
@@ -528,11 +528,17 @@ function UserManagement() {
                                 >
                                     <option value="Super Admin">Super Admin</option>
                                     <option value="Admin">Admin</option>
-                                    <option value="HR">HR</option>
+                                    <option value="HR Manager">HR Manager</option>
+                                    <option value="HR Executive">HR Executive</option>
                                     <option value="Finance Manager">Finance Manager</option>
+                                    <option value="Accountant">Accountant</option>
                                     <option value="Inventory Manager">Inventory Manager</option>
+                                    <option value="Store Keeper">Store Keeper</option>
                                     <option value="Project Manager">Project Manager</option>
+                                    <option value="Project Lead">Project Lead</option>
+                                    <option value="Employee">Employee</option>
                                     <option value="Executive">Executive</option>
+                                    <option value="Viewer">Viewer</option>
                                 </select>
                             </div>
 

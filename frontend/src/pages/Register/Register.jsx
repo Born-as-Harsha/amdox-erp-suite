@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { register } from "../../services/authService";
 import { convertImageToBase64 } from "../../utils/helpers";
 import { toast } from "react-toastify";
-import { FaUser, FaEnvelope, FaLock, FaPhone, FaBuilding, FaUserTie, FaEye, FaEyeSlash, FaSpinner, FaUpload, FaTrash } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaPhone, FaBuilding, FaUserTie, FaEye, FaEyeSlash, FaSpinner, FaUpload, FaTrash, FaMapMarkerAlt, FaHeartbeat, FaCalendarAlt, FaLanguage } from "react-icons/fa";
 
 function Register() {
     const navigate = useNavigate();
@@ -14,15 +14,22 @@ function Register() {
 
     const [formData, setFormData] = useState({
         employeeId: "",
+        username: "",
         name: "",
         email: "",
         phone: "",
         password: "",
         confirmPassword: "",
-        department: "",
-        designation: "",
-        role: "Employee", // default role
+        department: "Engineering",
+        designation: "Software Engineer",
+        role: "Employee", 
         profilePicture: "",
+        gender: "Male",
+        dateOfBirth: "",
+        address: "",
+        emergencyContact: "",
+        language: "English",
+        bio: "",
         agreeTerms: false
     });
 
@@ -47,6 +54,7 @@ function Register() {
     const validateForm = () => {
         const errs = {};
         if (!formData.employeeId.trim()) errs.employeeId = "Employee ID is required.";
+        if (!formData.username.trim()) errs.username = "Username is required.";
         if (!formData.name.trim()) errs.name = "Full Name is required.";
         if (!formData.email.trim()) {
             errs.email = "Email is required.";
@@ -88,17 +96,17 @@ function Register() {
 
     return (
         <div className="register-page">
-            <div className="register-card">
+            <div className="register-card" style={{ maxWidth: "1000px" }}>
                 <div className="company-logo">A</div>
                 <h1 className="company-title">AMADOX TECHNOLOGIES</h1>
                 <p className="company-subtitle">Enterprise AI-Powered Cloud ERP Suite</p>
                 
                 <h2>Create Account</h2>
 
-                <form onSubmit={handleRegister} noValidate className="register-form-grid">
+                <form onSubmit={handleRegister} noValidate className="register-form-grid" style={{ gridTemplateColumns: "220px 1fr" }}>
                     {/* Left Column: Avatar & File upload */}
                     <div className="avatar-upload-column">
-                        <div className="profile-avatar-wrapper">
+                        <div className="profile-avatar-wrapper" style={{ width: "120px", height: "120px" }}>
                             {formData.profilePicture ? (
                                 <img src={formData.profilePicture} alt="Avatar Preview" className="avatar-preview-img" />
                             ) : (
@@ -145,6 +153,20 @@ function Register() {
                             </div>
 
                             <div className="form-group">
+                                <label>Username *</label>
+                                <div className="input-box">
+                                    <FaUser className="input-icon" />
+                                    <input
+                                        type="text"
+                                        placeholder="kavyanair"
+                                        value={formData.username}
+                                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                    />
+                                </div>
+                                {errors.username && <span className="error-text">{errors.username}</span>}
+                            </div>
+
+                            <div className="form-group">
                                 <label>Full Name *</label>
                                 <div className="input-box">
                                     <FaUser className="input-icon" />
@@ -187,6 +209,44 @@ function Register() {
                             </div>
 
                             <div className="form-group">
+                                <label>Gender</label>
+                                <select
+                                    value={formData.gender}
+                                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                    style={{ padding: "10px", border: "1px solid #cbd5e1", borderRadius: "8px", background: "#f8fafc", outline: "none", fontSize: "14px" }}
+                                >
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Date of Birth</label>
+                                <div className="input-box">
+                                    <FaCalendarAlt className="input-icon" />
+                                    <input
+                                        type="date"
+                                        value={formData.dateOfBirth}
+                                        onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Language</label>
+                                <div className="input-box">
+                                    <FaLanguage className="input-icon" />
+                                    <input
+                                        type="text"
+                                        placeholder="English"
+                                        value={formData.language}
+                                        onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
                                 <label>Department *</label>
                                 <div className="input-box">
                                     <FaBuilding className="input-icon" />
@@ -212,6 +272,32 @@ function Register() {
                                     />
                                 </div>
                                 {errors.designation && <span className="error-text">{errors.designation}</span>}
+                            </div>
+
+                            <div className="form-group">
+                                <label>Emergency Contact</label>
+                                <div className="input-box">
+                                    <FaHeartbeat className="input-icon" />
+                                    <input
+                                        type="text"
+                                        placeholder="+91 99887 76655"
+                                        value={formData.emergencyContact}
+                                        onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Address</label>
+                                <div className="input-box">
+                                    <FaMapMarkerAlt className="input-icon" />
+                                    <input
+                                        type="text"
+                                        placeholder="Noida, India"
+                                        value={formData.address}
+                                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                    />
+                                </div>
                             </div>
 
                             <div className="form-group">
@@ -247,6 +333,16 @@ function Register() {
                                 </div>
                                 {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}
                             </div>
+                        </div>
+
+                        <div className="form-group" style={{ gridColumn: "span 2", marginTop: "12px" }}>
+                            <label>Biography</label>
+                            <textarea
+                                placeholder="Tell us about yourself..."
+                                value={formData.bio}
+                                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                                style={{ padding: "10px", border: "1px solid #cbd5e1", borderRadius: "8px", background: "#f8fafc", outline: "none", fontSize: "14px", minHeight: "80px", resize: "vertical" }}
+                            />
                         </div>
 
                         <div className="terms-checkbox-wrapper">

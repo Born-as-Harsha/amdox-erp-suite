@@ -3,7 +3,7 @@ import path from "path";
 
 export const saveBase64Image = (base64String, prefix = "profile") => {
     if (!base64String || !base64String.startsWith("data:image")) {
-        return base64String; // Return as-is if not base64 or already a static path
+        return base64String; // Return as-is if already a path
     }
 
     try {
@@ -16,19 +16,19 @@ export const saveBase64Image = (base64String, prefix = "profile") => {
         const base64Data = matches[2];
         const extension = type.split("/")[1] || "jpg";
         
-        // Ensure uploads directory exists
-        const uploadDir = path.join(process.cwd(), "uploads");
+        // Ensure uploads/profile directory exists
+        const uploadDir = path.join(process.cwd(), "uploads", "profile");
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
         }
 
-        const filename = `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}.${extension}`;
+        const filename = `${prefix}_${Date.now()}.${extension}`;
         const filePath = path.join(uploadDir, filename);
 
         fs.writeFileSync(filePath, Buffer.from(base64Data, "base64"));
         
         // Return static server path relative to root
-        return `/uploads/${filename}`;
+        return `/uploads/profile/${filename}`;
     } catch (err) {
         console.error("Error saving base64 image:", err);
         return base64String;
@@ -36,7 +36,7 @@ export const saveBase64Image = (base64String, prefix = "profile") => {
 };
 
 export const deleteImageFile = (imagePath) => {
-    if (!imagePath || !imagePath.startsWith("/uploads/")) return;
+    if (!imagePath || !imagePath.startsWith("/uploads/profile/")) return;
     try {
         const filePath = path.join(process.cwd(), imagePath);
         if (fs.existsSync(filePath)) {

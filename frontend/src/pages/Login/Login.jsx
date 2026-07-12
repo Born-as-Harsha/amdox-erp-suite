@@ -1,7 +1,7 @@
 import "./Login.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { login, loginWithRememberMe } from "../../services/authService";
+import { login, loginWithRememberMe, verifyOtp } from "../../services/authService";
 import { toast } from "react-toastify";
 
 import {
@@ -10,12 +10,13 @@ import {
     FaEye,
     FaEyeSlash,
     FaSpinner,
+    FaKey
 } from "react-icons/fa";
 
 function Login() {
     const navigate = useNavigate();
 
-    const [email, setEmail] = useState("");
+    const [emailOrUsername, setEmailOrUsername] = useState("");
     const [password, setPassword] = useState("");
 
     const [showPassword, setShowPassword] = useState(false);
@@ -23,9 +24,16 @@ function Login() {
     const [loading, setLoading] = useState(false);
     const [autoLoginLoading, setAutoLoginLoading] = useState(false);
 
+    // OTP verification fields
+    const [otpRequired, setOtpRequired] = useState(false);
+    const [otpEmail, setOtpEmail] = useState("");
+    const [otpCode, setOtpCode] = useState("");
+    const [otpLoading, setOtpLoading] = useState(false);
+
     const [errors, setErrors] = useState({
-        email: "",
+        emailOrUsername: "",
         password: "",
+        otpCode: ""
     });
 
     // Check rememberMeToken on mount for auto-login
@@ -41,7 +49,6 @@ function Login() {
                     toast.success("Welcome back! Auto-login successful.");
                     navigate("/dashboard", { replace: true });
                 } catch (error) {
-                    // Token expired or invalid, clean up
                     localStorage.removeItem("rememberMeToken");
                 } finally {
                     setAutoLoginLoading(false);
@@ -53,19 +60,15 @@ function Login() {
 
     const validateForm = () => {
         const newErrors = {
-            email: "",
+            emailOrUsername: "",
             password: "",
+            otpCode: ""
         };
 
         let valid = true;
 
-        if (!email.trim()) {
-            newErrors.email = "Email is required.";
-            valid = false;
-        } else if (
-            !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)
-        ) {
-            newErrors.email = "Please enter a valid email.";
+        if (!emailOrUsername.trim()) {
+            newErrors.emailOrUsername = "Email or Username is required.";
             valid = false;
         }
 
@@ -75,11 +78,10 @@ function Login() {
         }
 
         setErrors(newErrors);
-
         return valid;
     };
 
-    const handleLogin = async (e) => {
+    const handleLoginSubmit = async (e) => {
         e.preventDefault();
 
         if (!validateForm()) return;
@@ -88,12 +90,57 @@ function Login() {
 
         try {
             const data = await login({
-                email,
+                emailOrUsername,
                 password,
                 rememberMe
             });
 
-            // Keep compatibility with ProtectedRoute
+            if (data.otpRequired) {
+                // Secondary OTP Verification phase is required
+                setOtpEmail(data.email);
+                setOtpRequired(true);
+                toast.info("Authentication code has been generated. Check console log!");
+            } else {
+                // Direct login success
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data));
+
+                if (rememberMe && data.rememberMeToken) {
+                    localStorage.setItem("rememberMeToken", data.rememberMeToken);
+                } else {
+                    localStorage.removeItem("rememberMeToken");
+                }
+
+                toast.success("Login Successful!");
+                navigate("/dashboard", { replace: true });
+            }
+        } catch (error) {
+            toast.error(
+                error?.message ||
+                    error?.response?.data?.message ||
+                    "Invalid email/username or password."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleOtpVerify = async (e) => {
+        e.preventDefault();
+        if (!otpCode.trim() || otpCode.length !== 6) {
+            setErrors(prev => ({ ...prev, otpCode: "Please enter the 6-digit verification code." }));
+            return;
+        }
+
+        setOtpLoading(true);
+        try {
+            const data = await verifyOtp({
+                email: otpEmail,
+                otp: otpCode,
+                rememberMe
+            });
+
+            // Store authentication values
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data));
 
@@ -103,16 +150,12 @@ function Login() {
                 localStorage.removeItem("rememberMeToken");
             }
 
-            toast.success("Login Successful!");
+            toast.success("Identity verified! Welcome to ERP Suite.");
             navigate("/dashboard", { replace: true });
         } catch (error) {
-            toast.error(
-                error?.message ||
-                    error?.response?.data?.message ||
-                    "Invalid email or password."
-            );
+            toast.error(error?.message || "Invalid or expired verification code.");
         } finally {
-            setLoading(false);
+            setOtpLoading(false);
         }
     };
 
@@ -141,75 +184,76 @@ function Login() {
                     Enterprise AI-Powered Cloud ERP Suite
                 </p>
 
-                <h2>Secure Login</h2>
+                <h2>{otpRequired ? "OTP Verification" : "Secure Login"}</h2>
 
-                <form onSubmit={handleLogin} noValidate>
-                    <div className="form-group">
-                        <label>Email Address</label>
+                {!otpRequired ? (
+                    <form onSubmit={handleLoginSubmit} noValidate>
+                        <div className="form-group">
+                            <label>Email Address or Username</label>
 
-                        <div className="input-box">
-                            <FaEnvelope className="input-icon" />
+                            <div className="input-box">
+                                <FaEnvelope className="input-icon" />
 
-                            <input
-                                type="email"
-                                placeholder="Enter your email"
-                                value={email}
-                                autoComplete="email"
-                                onChange={(e) =>
-                                    setEmail(e.target.value)
-                                }
-                            />
+                                <input
+                                    type="text"
+                                    placeholder="Enter email or username"
+                                    value={emailOrUsername}
+                                    autoComplete="username"
+                                    onChange={(e) =>
+                                        setEmailOrUsername(e.target.value)
+                                    }
+                                />
 
+                            </div>
+
+                            {errors.emailOrUsername && (
+                                <span className="error-text">
+                                    {errors.emailOrUsername}
+                                </span>
+                            )}
                         </div>
 
-                        {errors.email && (
-                            <span className="error-text">
-                                {errors.email}
-                            </span>
-                        )}
-                    </div>
+                        <div className="form-group">
+                            <label>Password</label>
 
-                    <div className="form-group">
-                        <label>Password</label>
+                            <div className="input-box">
+                                <FaLock className="input-icon" />
 
-                        <div className="input-box">
-                            <FaLock className="input-icon" />
+                                <input
+                                    type={
+                                        showPassword
+                                            ? "text"
+                                            : "password"
+                                    }
+                                    placeholder="Enter your password"
+                                    value={password}
+                                    autoComplete="current-password"
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
+                                />
 
-                            <input
-                                type={
-                                    showPassword
-                                        ? "text"
-                                        : "password"
-                                }
-                                placeholder="Enter your password"
-                                value={password}
-                                autoComplete="current-password"
-                                onChange={(e) =>
-                                    setPassword(e.target.value)
-                                }
-                            />
+                                <button
+                                    type="button"
+                                    className="eye-btn"
+                                    onClick={() =>
+                                        setShowPassword(!showPassword)
+                                    }
+                                >
+                                    {showPassword ? (
+                                        <FaEyeSlash />
+                                    ) : (
+                                        <FaEye />
+                                    )}
+                                </button>
+                            </div>
 
-                            <button
-                                type="button"
-                                className="eye-btn"
-                                onClick={() =>
-                                    setShowPassword(!showPassword)
-                                }
-                            >
-                                {showPassword ? (
-                                    <FaEyeSlash />
-                                ) : (
-                                    <FaEye />
-                                )}
-                            </button>
+                            {errors.password && (
+                                <span className="error-text">
+                                    {errors.password}
+                                </span>
+                            )}
                         </div>
-
-                        {errors.password && (
-                            <span className="error-text">
-                                {errors.password}
-                            </span>
-                        )}
-                    </div>
 
                     <div className="login-options">
                         <label className="remember-me">
@@ -247,6 +291,49 @@ function Login() {
                         )}
                     </button>
                 </form>
+                ) : (
+                    <form onSubmit={handleOtpVerify} noValidate>
+                        <p style={{ fontSize: "13px", color: "#64748b", textAlign: "center", marginBottom: "20px", lineHeight: "1.5" }}>
+                            A verification code has been dispatched to <strong>{otpEmail}</strong>.<br />
+                            Check the <strong>server command prompt console logs</strong> to retrieve it!
+                        </p>
+
+                        <div className="form-group">
+                            <label>OTP Verification Code</label>
+                            <div className="input-box">
+                                <FaKey className="input-icon" />
+                                <input
+                                    type="text"
+                                    maxLength="6"
+                                    placeholder="enter 6-digit OTP code"
+                                    value={otpCode}
+                                    onChange={(e) => setOtpCode(e.target.value)}
+                                    style={{ letterSpacing: "3px", textAlign: "center", fontSize: "18px", paddingLeft: "12px" }}
+                                />
+                            </div>
+                            {errors.otpCode && <span className="error-text">{errors.otpCode}</span>}
+                        </div>
+
+                        <button type="submit" className="login-btn" disabled={otpLoading} style={{ marginTop: "20px" }}>
+                            {otpLoading ? (
+                                <>
+                                    <FaSpinner className="spinner" /> Verifying...
+                                </>
+                            ) : (
+                                "Verify & Continue"
+                            )}
+                        </button>
+
+                        <button
+                            type="button"
+                            className="back-login-btn"
+                            onClick={() => setOtpRequired(false)}
+                            style={{ background: "none", border: "none", color: "#64748b", width: "100%", textAlign: "center", marginTop: "15px", cursor: "pointer", fontSize: "13px", fontWeight: "600" }}
+                        >
+                            Back to Credentials
+                        </button>
+                    </form>
+                )}
 
                 <p className="redirect-text" style={{ fontSize: "13px", color: "#64748b", textAlign: "center", marginTop: "15px" }}>
                     Don't have an account? <span style={{ color: "#2563eb", fontWeight: "600", cursor: "pointer", textDecoration: "underline" }} onClick={() => navigate("/register")}>Register here</span>

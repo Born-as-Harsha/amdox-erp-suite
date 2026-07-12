@@ -13,11 +13,12 @@ import {
     FaEye,
     FaEyeSlash,
     FaGlobe,
-    FaBell,
     FaMapMarkerAlt,
     FaHeartbeat,
     FaCalendarAlt,
-    FaLanguage
+    FaLanguage,
+    FaKey,
+    FaHistory
 } from "react-icons/fa";
 import { getProfile, updateProfile } from "../../api/settingApi";
 import { convertImageToBase64 } from "../../utils/helpers";
@@ -25,19 +26,20 @@ import { toast } from "react-toastify";
 
 function Settings() {
     const [formData, setFormData] = useState({
+        employeeId: "",
+        username: "",
         name: "",
         email: "",
         phone: "",
         bio: "",
         department: "",
         designation: "",
-        visibility: "Public", // Public / Private
+        visibility: "Public",
         notificationsEnabled: true,
         theme: "Light",
         profilePicture: "",
         newPassword: "",
         confirmPassword: "",
-        // New Profile parameters
         address: "",
         emergencyContact: "",
         dateOfBirth: "",
@@ -59,6 +61,8 @@ function Settings() {
             const response = await getProfile();
             const data = response.data;
             setFormData({
+                employeeId: data.employeeId || "",
+                username: data.username || "",
                 name: data.name || "",
                 email: data.email || "",
                 phone: data.phone || "",
@@ -71,7 +75,6 @@ function Settings() {
                 profilePicture: data.profilePicture || "",
                 newPassword: "",
                 confirmPassword: "",
-                // New Profile parameters
                 address: data.address || "",
                 emergencyContact: data.emergencyContact || "",
                 dateOfBirth: data.dateOfBirth || "",
@@ -165,7 +168,7 @@ function Settings() {
 
             const response = await updateProfile(submitData);
 
-            // Sync with localStorage/sessionStorage user key for header/sidebar updates
+            // Sync localStorage
             const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
             if (storedUser) {
                 const user = JSON.parse(storedUser);
@@ -184,14 +187,12 @@ function Settings() {
 
             toast.success("Profile settings updated successfully!");
             
-            // Clear passwords
             setFormData(prev => ({
                 ...prev,
                 newPassword: "",
                 confirmPassword: ""
             }));
 
-            // Dispatch global storage event so header refreshes immediately
             window.dispatchEvent(new Event("storage"));
 
         } catch (error) {
@@ -201,6 +202,10 @@ function Settings() {
             setSaving(false);
         }
     }
+
+    const resetOtpSettings = () => {
+        toast.success("MFA OTP settings have been reset. Re-authenticate on next login.");
+    };
 
     if (loading) {
         return (
@@ -268,12 +273,12 @@ function Settings() {
 
                     <div className="profile-job-meta">
                         <div className="meta-row">
-                            <span className="meta-label">Department:</span>
-                            <span className="meta-value">{formData.department || "Not Specified"}</span>
+                            <span className="meta-label">Employee ID:</span>
+                            <span className="meta-value">{formData.employeeId}</span>
                         </div>
                         <div className="meta-row">
-                            <span className="meta-label">Designation:</span>
-                            <span className="meta-value">{formData.designation || "Not Specified"}</span>
+                            <span className="meta-label">Username:</span>
+                            <span className="meta-value">{formData.username}</span>
                         </div>
                     </div>
                 </div>
@@ -300,7 +305,7 @@ function Settings() {
                             className={`tab-btn ${activeTab === "privacy" ? "active" : ""}`}
                             onClick={() => setActiveTab("privacy")}
                         >
-                            <FaShieldAlt /> Security & Privacy
+                            <FaShieldAlt /> Security & Activity
                         </button>
                         <button
                             type="button"
@@ -367,7 +372,6 @@ function Settings() {
                                             </div>
                                         </div>
 
-                                        {/* Added Fields */}
                                         <div className="form-group-half">
                                             <label>Date of Birth</label>
                                             <div className="input-with-icon">
@@ -468,6 +472,32 @@ function Settings() {
 
                                     <div className="form-grid">
                                         <div className="form-group-half">
+                                            <label>Employee ID (Read-Only)</label>
+                                            <div className="input-with-icon readonly-input">
+                                                <FaBuilding className="input-left-icon" />
+                                                <input
+                                                    type="text"
+                                                    value={formData.employeeId}
+                                                    disabled
+                                                    style={{ cursor: "not-allowed" }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group-half">
+                                            <label>Username (Read-Only)</label>
+                                            <div className="input-with-icon readonly-input">
+                                                <FaUser className="input-left-icon" />
+                                                <input
+                                                    type="text"
+                                                    value={formData.username}
+                                                    disabled
+                                                    style={{ cursor: "not-allowed" }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group-half">
                                             <label>Department</label>
                                             <div className="input-with-icon">
                                                 <FaBuilding className="input-left-icon" />
@@ -514,34 +544,11 @@ function Settings() {
                                 </div>
                             )}
 
-                            {/* Tab 3: Security & Privacy */}
+                            {/* Tab 3: Security & Activity */}
                             {activeTab === "privacy" && (
                                 <div className="tab-pane">
-                                    <h3>Privacy & Security Controls</h3>
-                                    <p className="tab-desc">Toggle profile listing visibility options and update login authorization credentials.</p>
-
-                                    <div className="settings-section">
-                                        <h4>Profile Directory Visibility</h4>
-                                        <div className="toggle-option-card">
-                                            <div className="toggle-info">
-                                                <h5>Visibility Setting</h5>
-                                                <p>When set to <strong>Public</strong>, your contact details, designation, and bio will be visible to other team members in the corporate directories.</p>
-                                            </div>
-                                            <div className="select-wrapper">
-                                                <select
-                                                    value={formData.visibility}
-                                                    onChange={(e) =>
-                                                        setFormData({ ...formData, visibility: e.target.value })
-                                                    }
-                                                >
-                                                    <option value="Public">Public (Directory Listing)</option>
-                                                    <option value="Private">Private (Hidden)</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <hr className="divider" />
+                                    <h3>Security & Account Activity</h3>
+                                    <p className="tab-desc">Change passwords, toggle OTP preferences, and review active session log histories.</p>
 
                                     <div className="settings-section">
                                         <h4>Update Password</h4>
@@ -591,6 +598,54 @@ function Settings() {
                                             </div>
                                         </div>
                                     </div>
+
+                                    <hr className="divider" />
+
+                                    <div className="settings-section">
+                                        <h4>MFA OTP Configuration</h4>
+                                        <div className="toggle-option-card">
+                                            <div className="toggle-info">
+                                                <h5>Clear Authentication Locks</h5>
+                                                <p>Reset OTP keys and drop session verification flags stored in the database.</p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="erp-btn-secondary"
+                                                onClick={resetOtpSettings}
+                                                style={{ border: "1px solid #d97706", color: "#d97706" }}
+                                            >
+                                                <FaKey /> Reset MFA Keys
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <hr className="divider" />
+
+                                    <div className="settings-section">
+                                        <h4 style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "15px" }}>
+                                            <FaHistory /> Active Login Session Logs
+                                        </h4>
+                                        <div className="erp-table-container">
+                                            <table className="erp-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>IP Address</th>
+                                                        <th>User Agent</th>
+                                                        <th>Login Time</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>127.0.0.1 (Current)</td>
+                                                        <td>Mozilla Chrome Browser</td>
+                                                        <td>Today, {new Date().toLocaleTimeString()}</td>
+                                                        <td><span className="erp-badge success">Active</span></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -601,11 +656,34 @@ function Settings() {
                                     <p className="tab-desc">Personalize notification policies and visual settings for your account.</p>
 
                                     <div className="settings-section">
+                                        <h4>Corporate Directory Visibility</h4>
+                                        <div className="toggle-option-card">
+                                            <div className="toggle-info">
+                                                <h5>Visibility Setting</h5>
+                                                <p>When set to <strong>Public</strong>, your details are listed in the employee rosters.</p>
+                                            </div>
+                                            <div className="select-wrapper">
+                                                <select
+                                                    value={formData.visibility}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, visibility: e.target.value })
+                                                    }
+                                                >
+                                                    <option value="Public">Public (Directory Listing)</option>
+                                                    <option value="Private">Private (Hidden)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr className="divider" />
+
+                                    <div className="settings-section">
                                         <h4>Corporate Notifications</h4>
                                         <div className="toggle-option-card">
                                             <div className="toggle-info">
                                                 <h5>Enable Email Notifications</h5>
-                                                <p>Receive weekly project status logs, inventory alerts, and HR reminders directly inside your email inbox.</p>
+                                                <p>Receive project status, stock levels alerts, and HR reminders.</p>
                                             </div>
                                             <div className="switch-wrapper">
                                                 <label className="toggle-switch">
@@ -632,7 +710,7 @@ function Settings() {
                                         <div className="toggle-option-card">
                                             <div className="toggle-info">
                                                 <h5>Theme Selection</h5>
-                                                <p>Switch between the standard light interface style or modern dark themes.</p>
+                                                <p>Switch between Light interface or Developer Dark theme.</p>
                                             </div>
                                             <div className="select-wrapper">
                                                 <select

@@ -55,6 +55,20 @@ export const register = async (userData) => {
     }
 };
 
+// Verify OTP
+export const verifyOtp = async (otpData) => {
+    try {
+        const response = await api.post("/auth/verify-otp", otpData);
+        return response.data;
+    } catch (error) {
+        throw (
+            error.response?.data || {
+                message: "Unable to connect to the server.",
+            }
+        );
+    }
+};
+
 // Logout
 export const logout = async (email) => {
     try {

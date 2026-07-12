@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 
 export const seedDemoUsers = async () => {
     try {
-        console.log("Starting Enterprise Seeding... ⏳");
+        console.log("Starting Enterprise Seeding for 13 Roles... ⏳");
 
         // 1. Seed Permissions
         const permissions = [
@@ -33,12 +33,12 @@ export const seedDemoUsers = async () => {
         }
         console.log("Permissions seeded. ✅");
 
-        // 2. Seed Roles
+        // 2. Seed 13 Roles
         const roles = [
             {
                 roleName: "Super Admin",
                 description: "Complete ERP control and user deactivations",
-                permissions: permissions.map(p => p.permissionName) // All permissions
+                permissions: permissions.map(p => p.permissionName)
             },
             {
                 roleName: "Admin",
@@ -46,29 +46,59 @@ export const seedDemoUsers = async () => {
                 permissions: permissions.filter(p => p.permissionName !== "manage:users").map(p => p.permissionName)
             },
             {
-                roleName: "HR",
-                description: "Onboard personnel and manage payroll / clocks",
+                roleName: "HR Manager",
+                description: "Manage department personnel and run payroll",
                 permissions: ["read:employees", "write:employees", "read:reports", "write:reports", "read:settings", "write:settings"]
             },
             {
+                roleName: "HR Executive",
+                description: "Track personnel clocks and leave files",
+                permissions: ["read:employees", "read:reports", "read:settings", "write:settings"]
+            },
+            {
                 roleName: "Finance Manager",
-                description: "Manage Treasury balances and print ledger flows",
+                description: "Manage Treasury balances and budgets",
                 permissions: ["read:finance", "write:finance", "read:reports", "write:reports", "read:settings", "write:settings"]
             },
             {
+                roleName: "Accountant",
+                description: "Verify invoices and ledger postings",
+                permissions: ["read:finance", "read:reports", "read:settings", "write:settings"]
+            },
+            {
                 roleName: "Inventory Manager",
-                description: "Track inventory products and vendors",
+                description: "Manage warehouse assets and vendor lists",
                 permissions: ["read:inventory", "write:inventory", "read:reports", "write:reports", "read:settings", "write:settings"]
             },
             {
+                roleName: "Store Keeper",
+                description: "Verify stock catalogs and low stock sheets",
+                permissions: ["read:inventory", "read:settings", "write:settings"]
+            },
+            {
                 roleName: "Project Manager",
-                description: "Orchestrate project milestone tasks",
+                description: "Orchestrate project campaigns and milestones",
                 permissions: ["read:projects", "write:projects", "read:reports", "write:reports", "read:settings", "write:settings"]
             },
             {
+                roleName: "Project Lead",
+                description: "Manage project tasks checklist",
+                permissions: ["read:projects", "read:reports", "read:settings", "write:settings"]
+            },
+            {
+                roleName: "Employee",
+                description: "Personal dashboards access",
+                permissions: ["read:settings", "write:settings"]
+            },
+            {
                 roleName: "Executive",
-                description: "Read-only analytics visual report checks",
+                description: "Read-only analytics and corporate margins trends",
                 permissions: ["read:reports", "read:settings", "write:settings"]
+            },
+            {
+                roleName: "Viewer",
+                description: "Read-only access across allowed reports",
+                permissions: ["read:settings"]
             }
         ];
 
@@ -103,70 +133,137 @@ export const seedDemoUsers = async () => {
         }
         console.log("Departments seeded. ✅");
 
-        // 4. Seed Hashed Demo Users
+        // 4. Seed Hashed Demo Users (13 Accounts)
         const demoAccounts = [
             {
                 employeeId: "EMP001",
+                username: "superadmin",
                 name: "Super Admin",
-                email: "superadmin@amadox.com",
-                password: "SuperAdmin@123",
+                email: "admin@amadox.com",
+                password: "Admin@123",
                 role: "Super Admin",
                 department: "Executive Office",
                 designation: "Principal Administrator"
             },
             {
                 employeeId: "EMP002",
+                username: "admin",
                 name: "Harsha Admin",
-                email: "admin@amdox.com",
-                password: "Admin@123",
+                email: "operations@amadox.com",
+                password: "Admin123@",
                 role: "Admin",
                 department: "Engineering",
                 designation: "Senior IT Architect"
             },
             {
                 employeeId: "EMP003",
-                name: "Kavya HR",
-                email: "hr@amdox.com",
-                password: "HR@123",
-                role: "HR",
+                username: "hrmanager",
+                name: "HR Manager",
+                email: "hr.manager@amadox.com",
+                password: "HR123@",
+                role: "HR Manager",
                 department: "HR Operations",
                 designation: "Chief HR Executive"
             },
             {
                 employeeId: "EMP004",
-                name: "Rahul Finance",
-                email: "finance@amdox.com",
-                password: "Finance@123",
+                username: "hrexecutive",
+                name: "HR Executive",
+                email: "hr.executive@amadox.com",
+                password: "HRExec123@",
+                role: "HR Executive",
+                department: "HR Operations",
+                designation: "Personnel Officer"
+            },
+            {
+                employeeId: "EMP005",
+                username: "financemanager",
+                name: "Finance Manager",
+                email: "finance@amadox.com",
+                password: "Finance123@",
                 role: "Finance Manager",
                 department: "Finance & Accounting",
                 designation: "Chief Financial Officer"
             },
             {
-                employeeId: "EMP005",
-                name: "Arjun Inventory",
-                email: "inventory@amdox.com",
-                password: "Inventory@123",
+                employeeId: "EMP006",
+                username: "accountant",
+                name: "Accountant",
+                email: "accounts@amadox.com",
+                password: "Accounts123@",
+                role: "Accountant",
+                department: "Finance & Accounting",
+                designation: "Senior Ledger Accountant"
+            },
+            {
+                employeeId: "EMP007",
+                username: "inventorymanager",
+                name: "Inventory Manager",
+                email: "inventory@amadox.com",
+                password: "Inventory123@",
                 role: "Inventory Manager",
                 department: "Inventory & Warehouse",
                 designation: "Logistics Manager"
             },
             {
-                employeeId: "EMP006",
-                name: "Priya Projects",
-                email: "projects@amdox.com",
-                password: "Project@123",
-                role: "Project Manager",
-                department: "Engineering",
-                designation: "Senior Project Manager"
+                employeeId: "EMP008",
+                username: "storekeeper",
+                name: "Store Keeper",
+                email: "store@amadox.com",
+                password: "Store123@",
+                role: "Store Keeper",
+                department: "Inventory & Warehouse",
+                designation: "Warehouse Officer"
             },
             {
-                employeeId: "EMP007",
+                employeeId: "EMP009",
+                username: "projectmanager",
+                name: "Project Manager",
+                email: "pm@amadox.com",
+                password: "Project123@",
+                role: "Project Manager",
+                department: "Engineering",
+                designation: "Senior Projects Manager"
+            },
+            {
+                employeeId: "EMP010",
+                username: "projectlead",
+                name: "Project Lead",
+                email: "lead@amadox.com",
+                password: "Lead123@",
+                role: "Project Lead",
+                department: "Engineering",
+                designation: "Product Lead Developer"
+            },
+            {
+                employeeId: "EMP011",
+                username: "employee",
+                name: "Standard Employee",
+                email: "employee@amadox.com",
+                password: "Employee123@",
+                role: "Employee",
+                department: "Engineering",
+                designation: "Software Engineer"
+            },
+            {
+                employeeId: "EMP012",
+                username: "executive",
                 name: "CEO Executive",
-                email: "executive@amdox.com",
-                password: "Executive@123",
+                email: "executive@amadox.com",
+                password: "Executive123@",
                 role: "Executive",
                 department: "Executive Office",
                 designation: "Chief Executive Officer"
+            },
+            {
+                employeeId: "EMP013",
+                username: "viewer",
+                name: "General Viewer",
+                email: "viewer@amadox.com",
+                password: "Viewer123@",
+                role: "Viewer",
+                department: "Engineering",
+                designation: "Guest Analyst"
             }
         ];
 
@@ -180,6 +277,7 @@ export const seedDemoUsers = async () => {
             if (!userExists) {
                 await User.create({
                     employeeId: account.employeeId,
+                    username: account.username,
                     name: account.name,
                     email: account.email,
                     password: hashedPassword,
@@ -187,20 +285,22 @@ export const seedDemoUsers = async () => {
                     roleId: roleId,
                     department: account.department,
                     designation: account.designation,
-                    status: "Active"
+                    status: "Active",
+                    emailVerified: true,
+                    otpVerified: true
                 });
-                console.log(`Seeded Hashed Demo User: ${account.email}`);
+                console.log(`Seeded Hashed Account: ${account.email}`);
             } else {
-                // Ensure default hashed credentials and role map correctly
                 userExists.password = hashedPassword;
                 userExists.role = account.role;
                 userExists.roleId = roleId;
                 userExists.employeeId = account.employeeId;
+                userExists.username = account.username;
                 await userExists.save();
-                console.log(`Verified/Updated Hashed Demo User: ${account.email}`);
+                console.log(`Verified/Updated Account: ${account.email}`);
             }
         }
-        console.log("Enterprise Seeding Completed. ✅");
+        console.log("Enterprise 13 Roles Seeding Completed. ✅");
     } catch (error) {
         console.error("Error seeding enterprise database:", error);
     }

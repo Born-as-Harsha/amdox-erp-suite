@@ -11,9 +11,9 @@ import { saveBase64Image } from "../utils/imageHelper.js";
 // =====================================
 export const registerUser = async (req, res) => {
     try {
-        const { employeeId, name, email, phone, password, confirmPassword, department, designation, role, profilePicture } = req.body;
+        const { employeeId, username, name, email, phone, password, confirmPassword, department, designation, role, profilePicture, gender, dateOfBirth, address, emergencyContact, language, bio } = req.body;
 
-        if (!employeeId || !name || !email || !password) {
+        if (!employeeId || !username || !name || !email || !password) {
             return res.status(400).json({ message: "Mandatory fields are missing." });
         }
 
@@ -21,10 +21,15 @@ export const registerUser = async (req, res) => {
             return res.status(400).json({ message: "Passwords do not match." });
         }
 
-        // Check if email or employee ID exists
+        // Check duplicates
         const emailExists = await User.findOne({ email });
         if (emailExists) {
             return res.status(400).json({ message: "User with this email already exists." });
+        }
+
+        const usernameExists = await User.findOne({ username });
+        if (usernameExists) {
+            return res.status(400).json({ message: "Username is already taken." });
         }
 
         const employeeExists = await User.findOne({ employeeId });
@@ -32,7 +37,7 @@ export const registerUser = async (req, res) => {
             return res.status(400).json({ message: "Employee ID is already registered." });
         }
 
-        // Determine user role and roleId
+        // Role assignment
         const userRole = role || "Employee";
         const roleDoc = await Role.findOne({ roleName: userRole });
         const roleId = roleDoc ? roleDoc._id : null;
@@ -41,9 +46,9 @@ export const registerUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Create User first to get _id
         const user = new User({
             employeeId,
+            username,
             name,
             email,
             phone: phone || "",
@@ -52,12 +57,20 @@ export const registerUser = async (req, res) => {
             roleId,
             department: department || "",
             designation: designation || "",
-            status: "Active"
+            gender: gender || "Male",
+            dateOfBirth: dateOfBirth || "",
+            address: address || "",
+            emergencyContact: emergencyContact || "",
+            language: language || "English",
+            bio: bio || "",
+            status: "Active",
+            emailVerified: true,
+            otpVerified: true
         });
 
-        // Save profile picture to server if provided
+        // Save profile picture to uploads/profile
         if (profilePicture && profilePicture.startsWith("data:image")) {
-            const staticPath = saveBase64Image(profilePicture, `profile_${user._id}`);
+            const staticPath = saveBase64Image(profilePicture, `profile_${user.employeeId}`);
             if (staticPath) {
                 user.profilePicture = staticPath;
             }
@@ -69,7 +82,7 @@ export const registerUser = async (req, res) => {
         await AuditLog.create({
             userId: user._id,
             action: "User Registration",
-            details: `User ${user.email} successfully registered under Employee ID ${user.employeeId}.`,
+            details: `User ${user.email} registered.`,
             ipAddress: req.ip || ""
         });
 
@@ -88,35 +101,60 @@ export const registerUser = async (req, res) => {
 };
 
 // =====================================
-// LOGIN USER
+// LOGIN USER (Email OR Username)
 // =====================================
 export const loginUser = async (req, res) => {
     try {
-        const { email, password, rememberMe } = req.body;
+        const { emailOrUsername, password, rememberMe } = req.body;
 
-        const user = await User.findOne({ email });
+        // Find user by email OR username
+        const user = await User.findOne({
+            $or: [{ email: emailOrUsername }, { username: emailOrUsername }]
+        });
+
         if (!user) {
-            return res.status(401).json({ message: "Invalid email or password." });
+            return res.status(401).json({ message: "Invalid email/username or password." });
         }
 
         if (user.status === "Inactive") {
-            return res.status(403).json({ message: "Your account is deactivated. Please contact your administrator." });
+            return res.status(403).json({ message: "Your account is deactivated." });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ message: "Invalid email or password." });
+            return res.status(401).json({ message: "Invalid email/username or password." });
         }
 
-        // Update last login
+        // Determine OTP Requirement Level
+        const level1Roles = ["Employee", "Viewer"];
+        const needsOtp = !level1Roles.includes(user.role);
+
+        if (needsOtp) {
+            // Generate 6 digit OTP
+            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+            user.otpCode = otpCode;
+            user.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes validation
+            user.otpVerified = false;
+            await user.save();
+
+            // Print OTP to Node Console for simulated email dispatch
+            console.log(`\n======================================\n[SIMULATED EMAIL DISPATCH]\nTO: ${user.email}\nSUBJECT: AMADOX ERP OTP VERIFICATION CODE\nOTP CODE: ${otpCode}\n======================================\n`);
+
+            return res.status(200).json({
+                otpRequired: true,
+                email: user.email,
+                message: "OTP Code sent successfully. Please verify to log in."
+            });
+        }
+
+        // Direct Login for Level 1
         user.lastLogin = new Date();
+        user.otpVerified = true;
         
-        // Generate tokens
         const accessToken = generateToken(user._id);
         const refreshToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         user.refreshToken = refreshToken;
 
-        // Remember Me session support
         let rememberMeToken = "";
         if (rememberMe) {
             rememberMeToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -127,11 +165,9 @@ export const loginUser = async (req, res) => {
 
         await user.save();
 
-        // Load permissions list dynamically from database Role collection
         const roleDoc = await Role.findOne({ roleName: user.role });
         const permissions = roleDoc ? roleDoc.permissions : [];
 
-        // Log Active Session
         await UserSession.create({
             userId: user._id,
             ipAddress: req.ip || "",
@@ -139,11 +175,82 @@ export const loginUser = async (req, res) => {
             isActive: true
         });
 
-        // Write Audit Log
         await AuditLog.create({
             userId: user._id,
             action: "User Login",
             details: `User ${user.email} logged in.`,
+            ipAddress: req.ip || ""
+        });
+
+        res.status(200).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            employeeId: user.employeeId,
+            profilePicture: user.profilePicture,
+            department: user.department,
+            designation: user.designation,
+            permissions,
+            token: accessToken,
+            refreshToken,
+            rememberMeToken
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// =====================================
+// VERIFY OTP ENDPOINT
+// =====================================
+export const verifyOtp = async (req, res) => {
+    try {
+        const { email, otp, rememberMe } = req.body;
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        if (!user.otpCode || user.otpCode !== otp || user.otpExpires < Date.now()) {
+            return res.status(400).json({ message: "Invalid or expired OTP code." });
+        }
+
+        // OTP Verified, clear code
+        user.otpCode = "";
+        user.otpExpires = undefined;
+        user.otpVerified = true;
+        user.lastLogin = new Date();
+
+        const accessToken = generateToken(user._id);
+        const refreshToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        user.refreshToken = refreshToken;
+
+        let rememberMeToken = "";
+        if (rememberMe) {
+            rememberMeToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            user.rememberMeToken = rememberMeToken;
+        } else {
+            user.rememberMeToken = "";
+        }
+
+        await user.save();
+
+        const roleDoc = await Role.findOne({ roleName: user.role });
+        const permissions = roleDoc ? roleDoc.permissions : [];
+
+        await UserSession.create({
+            userId: user._id,
+            ipAddress: req.ip || "",
+            userAgent: req.headers["user-agent"] || "",
+            isActive: true
+        });
+
+        await AuditLog.create({
+            userId: user._id,
+            action: "OTP Login Verified",
+            details: `OTP Verified for user ${user.email}.`,
             ipAddress: req.ip || ""
         });
 
@@ -177,6 +284,7 @@ export const logoutUser = async (req, res) => {
         if (user) {
             user.refreshToken = "";
             user.rememberMeToken = "";
+            user.lastLogout = new Date();
             await user.save();
 
             // Deactivate all user sessions

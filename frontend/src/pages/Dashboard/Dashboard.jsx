@@ -505,16 +505,16 @@ function Dashboard() {
             </div>
 
             {/* Render Tailored Dashboard based on active role */}
-            {role === "Super Admin" || role === "Admin" ? renderAdminDashboard() : null}
-            {role === "HR" ? renderHRDashboard() : null}
-            {(role === "Finance" || role === "Finance Manager") ? renderFinanceDashboard() : null}
-            {role === "Inventory Manager" ? renderInventoryDashboard() : null}
-            {role === "Project Manager" ? renderProjectDashboard() : null}
+            {(role === "Super Admin" || role === "Admin") ? renderAdminDashboard() : null}
+            {(role === "HR Manager" || role === "HR Executive" || role === "HR") ? renderHRDashboard() : null}
+            {(role === "Finance Manager" || role === "Accountant" || role === "Finance") ? renderFinanceDashboard() : null}
+            {(role === "Inventory Manager" || role === "Store Keeper") ? renderInventoryDashboard() : null}
+            {(role === "Project Manager" || role === "Project Lead") ? renderProjectDashboard() : null}
             {role === "Executive" ? renderExecutiveDashboard() : null}
-            {role === "Employee" ? (
+            {(role === "Employee" || role === "Viewer") ? (
                 <div className="erp-card" style={{ padding: "30px", textAlign: "center" }}>
-                    <h3>Standard Employee Dashboard</h3>
-                    <p>You have standard access to reports. Use the sidebar to navigate settings and audit sheets.</p>
+                    <h3>Personal Employee Portal</h3>
+                    <p>Welcome to your enterprise portal. Use settings to update personal profiles, address, language preferences, and security credentials.</p>
                 </div>
             ) : null}
         </div>
