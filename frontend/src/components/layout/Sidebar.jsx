@@ -209,7 +209,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
 
     return (
         <aside className="sidebar">
-            <div>
+            <div className="sidebar-menu-scroll">
                 <div className="sidebar-header">
                     {!isCollapsed && <h2>ERP Menu</h2>}
                     <button
