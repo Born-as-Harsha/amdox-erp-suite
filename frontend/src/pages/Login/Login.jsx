@@ -2,6 +2,7 @@ import "./Login.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, loginWithRememberMe, verifyOtp } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
 
 import {
@@ -15,6 +16,7 @@ import {
 
 function Login() {
     const navigate = useNavigate();
+    const { loginUserContext } = useAuth();
 
     const [emailOrUsername, setEmailOrUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -46,6 +48,10 @@ function Login() {
                     const data = await loginWithRememberMe(token);
                     localStorage.setItem("token", data.token);
                     localStorage.setItem("user", JSON.stringify(data));
+                    
+                    // Populate Auth Context
+                    loginUserContext(data);
+
                     toast.success("Welcome back! Auto-login successful.");
                     navigate("/dashboard", { replace: true });
                 } catch (error) {
@@ -56,7 +62,7 @@ function Login() {
             }
         };
         checkAutoLogin();
-    }, [navigate]);
+    }, [navigate, loginUserContext]);
 
     const validateForm = () => {
         const newErrors = {
@@ -111,6 +117,9 @@ function Login() {
                     localStorage.removeItem("rememberMeToken");
                 }
 
+                // Populate Auth Context
+                loginUserContext(data);
+
                 toast.success("Login Successful!");
                 navigate("/dashboard", { replace: true });
             }
@@ -149,6 +158,9 @@ function Login() {
             } else {
                 localStorage.removeItem("rememberMeToken");
             }
+
+            // Populate Auth Context
+            loginUserContext(data);
 
             toast.success("Identity verified! Welcome to ERP Suite.");
             navigate("/dashboard", { replace: true });
