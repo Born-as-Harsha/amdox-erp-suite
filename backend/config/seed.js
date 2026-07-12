@@ -285,6 +285,7 @@ export const seedDemoUsers = async () => {
                     roleId: roleId,
                     department: account.department,
                     designation: account.designation,
+                    phone: "7901446220",
                     status: "Active",
                     emailVerified: true,
                     otpVerified: true
@@ -296,6 +297,7 @@ export const seedDemoUsers = async () => {
                 userExists.roleId = roleId;
                 userExists.employeeId = account.employeeId;
                 userExists.username = account.username;
+                userExists.phone = "7901446220";
                 await userExists.save();
                 console.log(`Verified/Updated Account: ${account.email}`);
             }

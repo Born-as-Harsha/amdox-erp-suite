@@ -362,14 +362,14 @@ function Login() {
                     <p className="gateway-desc">Enter your enterprise credentials and pass verification to enter the ERP portal.</p>
 
                     <form onSubmit={handleFormSubmit} noValidate>
-                        {/* Field 1: Email or Username */}
+                        {/* Field 1: Email, Username, or Mobile Number */}
                         <div className="form-group">
-                            <label>Email Address or Username</label>
+                            <label>Email, Username, or Mobile Number</label>
                             <div className="input-box">
                                 <FaEnvelope className="input-icon" />
                                 <input
                                     type="text"
-                                    placeholder="Enter email or username"
+                                    placeholder="Enter email, username, or mobile number"
                                     value={emailOrUsername}
                                     autoComplete="username"
                                     disabled={otpRequired}

@@ -107,13 +107,17 @@ export const loginUser = async (req, res) => {
     try {
         const { emailOrUsername, password, rememberMe } = req.body;
 
-        // Find user by email OR username
+        // Find user by email OR username OR phone
         const user = await User.findOne({
-            $or: [{ email: emailOrUsername }, { username: emailOrUsername }]
+            $or: [
+                { email: emailOrUsername },
+                { username: emailOrUsername },
+                { phone: emailOrUsername }
+            ]
         });
 
         if (!user) {
-            return res.status(401).json({ message: "Invalid email/username or password." });
+            return res.status(401).json({ message: "Invalid email/username/mobile or password." });
         }
 
         if (user.status === "Inactive") {
@@ -122,7 +126,7 @@ export const loginUser = async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ message: "Invalid email/username or password." });
+            return res.status(401).json({ message: "Invalid email/username/mobile or password." });
         }
 
         // Determine OTP Requirement Level
@@ -137,8 +141,8 @@ export const loginUser = async (req, res) => {
             user.otpVerified = false;
             await user.save();
 
-            // Print OTP to Node Console for simulated email dispatch
-            console.log(`\n======================================\n[SIMULATED EMAIL DISPATCH]\nTO: ${user.email}\nSUBJECT: AMADOX ERP OTP VERIFICATION CODE\nOTP CODE: ${otpCode}\n======================================\n`);
+            // Print OTP to Node Console for simulated email/SMS dispatch
+            console.log(`\n======================================\n[SIMULATED SMS & EMAIL DISPATCH]\nTO: ${user.email}\nSMS PHONE: ${user.phone || "7901446220"}\nSUBJECT: AMADOX ERP OTP VERIFICATION CODE\nOTP CODE: ${otpCode}\n======================================\n`);
 
             return res.status(200).json({
                 otpRequired: true,
