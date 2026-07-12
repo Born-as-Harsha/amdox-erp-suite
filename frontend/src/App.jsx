@@ -104,7 +104,7 @@ function App() {
                     <Route
                         path="/attendance"
                         element={
-                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR Manager", "HR Executive"]}>
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR Manager", "HR Executive", "Employee"]}>
                                 <Attendance />
                             </RoleProtectedRoute>
                         }
@@ -113,7 +113,7 @@ function App() {
                     <Route
                         path="/leave"
                         element={
-                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR Manager", "HR Executive"]}>
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR Manager", "HR Executive", "Employee"]}>
                                 <Leave />
                             </RoleProtectedRoute>
                         }
