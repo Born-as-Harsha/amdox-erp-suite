@@ -1,5 +1,6 @@
 import "./Layout.css";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { logout as apiLogout } from "../../services/authService";
 import {
     FaTachometerAlt,
@@ -17,36 +18,25 @@ import {
     FaCalendarTimes,
     FaTruck,
     FaTasks,
-    FaChartLine
+    FaChartLine,
+    FaHistory,
+    FaUserTie
 } from "react-icons/fa";
 
 function Sidebar({ isCollapsed, toggleCollapse }) {
     const navigate = useNavigate();
-    let role = "";
-
-    try {
-        const storedUser =
-            localStorage.getItem("user") ||
-            sessionStorage.getItem("user");
-
-        if (storedUser) {
-            const user = JSON.parse(storedUser);
-            role = user?.role || "";
-        }
-    } catch (error) {
-        console.error(error);
-    }
+    const { user, logoutUserContext } = useAuth();
+    const role = user?.role || "";
 
     const logout = async () => {
         try {
-            const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-            if (storedUser) {
-                const user = JSON.parse(storedUser);
+            if (user?.email) {
                 await apiLogout(user.email);
             }
         } catch (e) {
             console.error("Logout API error", e);
         } finally {
+            logoutUserContext();
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             localStorage.removeItem("rememberMeToken");
@@ -68,15 +58,154 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
         </li>
     );
 
-    const isSuperAdmin = role === "Super Admin";
-    const isAdmin = role === "Admin" || isSuperAdmin;
-    const isHR = role === "HR Manager" || role === "HR Executive" || role === "HR";
-    const isFinance = role === "Finance Manager" || role === "Accountant" || role === "Finance";
-    const isInventory = role === "Inventory Manager" || role === "Store Keeper";
-    const isProject = role === "Project Manager" || role === "Project Lead";
-    const isExecutive = role === "Executive";
-    const isEmployee = role === "Employee";
-    const isViewer = role === "Viewer";
+    // Dynamic sidebar menus matching specification strictly
+    const renderRoleLinks = () => {
+        switch (role) {
+            case "Super Admin":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/users", <FaUsers />, "User Management")}
+                        {renderLink("/employees", <FaUsers />, "Employees")}
+                        {renderLink("/finance", <FaMoneyBillWave />, "Finance")}
+                        {renderLink("/inventory", <FaBoxes />, "Inventory")}
+                        {renderLink("/projects", <FaProjectDiagram />, "Projects")}
+                        {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                        {renderLink("/audit-logs", <FaHistory />, "Audit Logs")}
+                        {renderLink("/system-config", <FaCog />, "System Config")}
+                        {renderLink("/analytics", <FaChartLine />, "Analytics")}
+                    </>
+                );
+            case "Admin":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/employees", <FaUsers />, "Employees")}
+                        {renderLink("/finance", <FaMoneyBillWave />, "Finance")}
+                        {renderLink("/inventory", <FaBoxes />, "Inventory")}
+                        {renderLink("/projects", <FaProjectDiagram />, "Projects")}
+                        {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            case "HR Manager":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/employees", <FaUsers />, "Employees")}
+                        {renderLink("/attendance", <FaUserClock />, "Attendance")}
+                        {renderLink("/leave", <FaCalendarTimes />, "Leave")}
+                        {renderLink("/recruitment", <FaUserTie />, "Recruitment")}
+                        {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            case "HR Executive":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/employees", <FaUsers />, "Employees")}
+                        {renderLink("/attendance", <FaUserClock />, "Attendance")}
+                        {renderLink("/leave", <FaCalendarTimes />, "Leave")}
+                        {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            case "Finance Manager":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/finance", <FaMoneyBillWave />, "Finance")}
+                        {renderLink("/invoices", <FaFileInvoiceDollar />, "Invoices")}
+                        {renderLink("/payroll", <FaFileInvoiceDollar />, "Payroll")}
+                        {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            case "Accountant":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/finance", <FaMoneyBillWave />, "Finance")}
+                        {renderLink("/invoices", <FaFileInvoiceDollar />, "Invoices")}
+                        {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            case "Inventory Manager":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/inventory", <FaBoxes />, "Inventory")}
+                        {renderLink("/suppliers", <FaTruck />, "Suppliers")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            case "Store Keeper":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/inventory", <FaBoxes />, "Inventory")}
+                        {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            case "Project Manager":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/projects", <FaProjectDiagram />, "Projects")}
+                        {renderLink("/teams", <FaUsers />, "Teams")}
+                        {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            case "Project Lead":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/projects", <FaProjectDiagram />, "Projects")}
+                        {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            case "Employee":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/tasks", <FaTasks />, "My Tasks")}
+                        {renderLink("/leave", <FaCalendarTimes />, "Leave")}
+                        {renderLink("/attendance", <FaUserClock />, "Attendance")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            case "Executive":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/analytics", <FaChartLine />, "Analytics")}
+                        {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            case "Viewer":
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+            default:
+                return (
+                    <>
+                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/settings", <FaCog />, "Settings")}
+                    </>
+                );
+        }
+    };
 
     return (
         <aside className="sidebar">
@@ -95,84 +224,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
 
                 <nav>
                     <ul>
-                        {/* Dashboard is visible to all roles */}
-                        {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
-
-                        {/* Super Admin User Management */}
-                        {isSuperAdmin && renderLink("/users", <FaUsers />, "User Management")}
-
-                        {/* General Admin Access */}
-                        {isAdmin && (
-                            <>
-                                {renderLink("/employees", <FaUsers />, "Employees")}
-                                {renderLink("/inventory", <FaBoxes />, "Inventory")}
-                                {renderLink("/finance", <FaMoneyBillWave />, "Finance")}
-                                {renderLink("/projects", <FaProjectDiagram />, "Projects")}
-                                {renderLink("/reports", <FaChartBar />, "Reports")}
-                                {renderLink("/settings", <FaCog />, "Settings")}
-                            </>
-                        )}
-
-                        {/* HR Roles */}
-                        {isHR && (
-                            <>
-                                {renderLink("/employees", <FaUsers />, "Employees")}
-                                {role === "HR Manager" && (
-                                    <>
-                                        {renderLink("/payroll", <FaFileInvoiceDollar />, "Payroll")}
-                                        {renderLink("/attendance", <FaUserClock />, "Attendance")}
-                                        {renderLink("/leave", <FaCalendarTimes />, "Leave")}
-                                    </>
-                                )}
-                                {renderLink("/reports", <FaChartBar />, "Reports")}
-                                {renderLink("/settings", <FaCog />, "Settings")}
-                            </>
-                        )}
-
-                        {/* Finance Roles */}
-                        {isFinance && (
-                            <>
-                                {renderLink("/finance", <FaMoneyBillWave />, "Finance")}
-                                {renderLink("/reports", <FaChartBar />, "Reports")}
-                                {renderLink("/settings", <FaCog />, "Settings")}
-                            </>
-                        )}
-
-                        {/* Inventory Roles */}
-                        {isInventory && (
-                            <>
-                                {renderLink("/inventory", <FaBoxes />, "Inventory")}
-                                {role === "Inventory Manager" && renderLink("/suppliers", <FaTruck />, "Suppliers")}
-                                {renderLink("/reports", <FaChartBar />, "Reports")}
-                                {renderLink("/settings", <FaCog />, "Settings")}
-                            </>
-                        )}
-
-                        {/* Projects Roles */}
-                        {isProject && (
-                            <>
-                                {renderLink("/projects", <FaProjectDiagram />, "Projects")}
-                                {role === "Project Manager" && renderLink("/tasks", <FaTasks />, "Tasks")}
-                                {renderLink("/reports", <FaChartBar />, "Reports")}
-                                {renderLink("/settings", <FaCog />, "Settings")}
-                            </>
-                        )}
-
-                        {/* Executive Roles */}
-                        {isExecutive && (
-                            <>
-                                {renderLink("/analytics", <FaChartLine />, "Analytics")}
-                                {renderLink("/reports", <FaChartBar />, "Reports")}
-                                {renderLink("/settings", <FaCog />, "Settings")}
-                            </>
-                        )}
-
-                        {/* Employee & Viewer Standard Links */}
-                        {(isEmployee || isViewer) && (
-                            <>
-                                {renderLink("/settings", <FaCog />, "Settings")}
-                            </>
-                        )}
+                        {renderRoleLinks()}
                     </ul>
                 </nav>
             </div>

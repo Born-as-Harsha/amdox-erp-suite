@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
     getInventory,
     addProduct,
@@ -7,23 +6,16 @@ import {
     deleteProduct,
     getInventoryStats
 } from "../controllers/inventoryController.js";
-
-import protect from "../middleware/authMiddleware.js";
+import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// ==========================
-// INVENTORY ROUTES
-// ==========================
+const inventoryAllowed = ["Super Admin", "Admin", "Inventory Manager", "Store Keeper"];
 
-router.get("/", protect, getInventory);
-
-router.get("/stats", protect, getInventoryStats);
-
-router.post("/", protect, addProduct);
-
-router.put("/:id", protect, updateProduct);
-
-router.delete("/:id", protect, deleteProduct);
+router.get("/", protect, authorizeRoles(...inventoryAllowed), getInventory);
+router.get("/stats", protect, authorizeRoles(...inventoryAllowed), getInventoryStats);
+router.post("/", protect, authorizeRoles("Super Admin", "Admin", "Inventory Manager"), addProduct);
+router.put("/:id", protect, authorizeRoles("Super Admin", "Admin", "Inventory Manager"), updateProduct);
+router.delete("/:id", protect, authorizeRoles("Super Admin", "Admin", "Inventory Manager"), deleteProduct);
 
 export default router;

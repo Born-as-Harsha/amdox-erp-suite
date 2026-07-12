@@ -23,8 +23,10 @@ import {
 import { getProfile, updateProfile } from "../../api/settingApi";
 import { convertImageToBase64 } from "../../utils/helpers";
 import { toast } from "react-toastify";
+import { useAuth } from "../../context/AuthContext";
 
 function Settings() {
+    const { refreshUserContext } = useAuth();
     const [formData, setFormData] = useState({
         employeeId: "",
         username: "",
@@ -168,22 +170,12 @@ function Settings() {
 
             const response = await updateProfile(submitData);
 
-            // Sync localStorage
-            const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-            if (storedUser) {
-                const user = JSON.parse(storedUser);
-                const updatedUser = {
-                    ...user,
-                    name: response.data.name,
-                    email: response.data.email,
-                    profilePicture: response.data.profilePicture
-                };
-                if (localStorage.getItem("user")) {
-                    localStorage.setItem("user", JSON.stringify(updatedUser));
-                } else {
-                    sessionStorage.setItem("user", JSON.stringify(updatedUser));
-                }
-            }
+            // Sync context state
+            refreshUserContext({
+                name: response.data.name,
+                email: response.data.email,
+                profilePicture: response.data.profilePicture
+            });
 
             toast.success("Profile settings updated successfully!");
             
@@ -192,8 +184,6 @@ function Settings() {
                 newPassword: "",
                 confirmPassword: ""
             }));
-
-            window.dispatchEvent(new Event("storage"));
 
         } catch (error) {
             console.error("Error saving settings", error);

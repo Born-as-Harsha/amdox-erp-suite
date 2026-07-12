@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
     getProjects,
     addProject,
@@ -7,19 +6,16 @@ import {
     deleteProject,
     getProjectStats
 } from "../controllers/projectController.js";
-
-import protect from "../middleware/authMiddleware.js";
+import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", protect, getProjects);
+const projectsAllowed = ["Super Admin", "Admin", "Project Manager", "Project Lead", "Employee"];
 
-router.get("/stats", protect, getProjectStats);
-
-router.post("/", protect, addProject);
-
-router.put("/:id", protect, updateProject);
-
-router.delete("/:id", protect, deleteProject);
+router.get("/", protect, authorizeRoles(...projectsAllowed), getProjects);
+router.get("/stats", protect, authorizeRoles(...projectsAllowed), getProjectStats);
+router.post("/", protect, authorizeRoles("Super Admin", "Admin", "Project Manager", "Project Lead"), addProject);
+router.put("/:id", protect, authorizeRoles("Super Admin", "Admin", "Project Manager", "Project Lead"), updateProject);
+router.delete("/:id", protect, authorizeRoles("Super Admin", "Admin", "Project Manager"), deleteProject);
 
 export default router;

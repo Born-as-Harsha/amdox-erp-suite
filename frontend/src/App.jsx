@@ -9,15 +9,20 @@ import Employees from "./pages/Employees/Employees";
 import Payroll from "./pages/HR/Payroll";
 import Attendance from "./pages/HR/Attendance";
 import Leave from "./pages/HR/Leave";
+import Recruitment from "./pages/HR/Recruitment";
 import Inventory from "./pages/Inventory/Inventory";
 import Suppliers from "./pages/Inventory/Suppliers";
 import Finance from "./pages/Finance/Finance";
+import Invoices from "./pages/Finance/Invoices";
 import Projects from "./pages/Projects/Projects";
 import Tasks from "./pages/Projects/Tasks";
+import Teams from "./pages/Projects/Teams";
 import Analytics from "./pages/Executive/Analytics";
 import Reports from "./pages/Reports/Reports";
 import Settings from "./pages/Settings/Settings";
 import UserManagement from "./pages/Admin/UserManagement";
+import AuditLogs from "./pages/Admin/AuditLogs";
+import SystemConfig from "./pages/Admin/SystemConfig";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -25,7 +30,21 @@ import AppLayout from "./components/layout/AppLayout";
 import { SearchProvider } from "./context/SearchContext";
 
 function App() {
-    const allRoles = ["Super Admin", "Admin", "HR", "Finance Manager", "Inventory Manager", "Project Manager", "Executive"];
+    const allRoles = [
+        "Super Admin",
+        "Admin",
+        "HR Manager",
+        "HR Executive",
+        "Finance Manager",
+        "Accountant",
+        "Inventory Manager",
+        "Store Keeper",
+        "Project Manager",
+        "Project Lead",
+        "Employee",
+        "Executive",
+        "Viewer"
+    ];
 
     return (
         <BrowserRouter>
@@ -67,7 +86,7 @@ function App() {
                     <Route
                         path="/employees"
                         element={
-                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR"]}>
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR Manager", "HR Executive"]}>
                                 <Employees />
                             </RoleProtectedRoute>
                         }
@@ -76,7 +95,7 @@ function App() {
                     <Route
                         path="/payroll"
                         element={
-                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR"]}>
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR Manager"]}>
                                 <Payroll />
                             </RoleProtectedRoute>
                         }
@@ -85,7 +104,7 @@ function App() {
                     <Route
                         path="/attendance"
                         element={
-                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR"]}>
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR Manager", "HR Executive"]}>
                                 <Attendance />
                             </RoleProtectedRoute>
                         }
@@ -94,8 +113,17 @@ function App() {
                     <Route
                         path="/leave"
                         element={
-                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR"]}>
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR Manager", "HR Executive"]}>
                                 <Leave />
+                            </RoleProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/recruitment"
+                        element={
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "HR Manager", "HR Executive"]}>
+                                <Recruitment />
                             </RoleProtectedRoute>
                         }
                     />
@@ -103,7 +131,7 @@ function App() {
                     <Route
                         path="/inventory"
                         element={
-                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Inventory Manager"]}>
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Inventory Manager", "Store Keeper"]}>
                                 <Inventory />
                             </RoleProtectedRoute>
                         }
@@ -121,8 +149,17 @@ function App() {
                     <Route
                         path="/finance"
                         element={
-                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Finance Manager", "Finance"]}>
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Finance Manager", "Accountant"]}>
                                 <Finance />
+                            </RoleProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/invoices"
+                        element={
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Finance Manager", "Accountant"]}>
+                                <Invoices />
                             </RoleProtectedRoute>
                         }
                     />
@@ -130,7 +167,7 @@ function App() {
                     <Route
                         path="/projects"
                         element={
-                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Project Manager"]}>
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Project Manager", "Project Lead"]}>
                                 <Projects />
                             </RoleProtectedRoute>
                         }
@@ -139,8 +176,17 @@ function App() {
                     <Route
                         path="/tasks"
                         element={
-                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Project Manager"]}>
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Project Manager", "Project Lead", "Employee"]}>
                                 <Tasks />
+                            </RoleProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/teams"
+                        element={
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Project Manager", "Project Lead"]}>
+                                <Teams />
                             </RoleProtectedRoute>
                         }
                     />
@@ -177,6 +223,24 @@ function App() {
                         element={
                             <RoleProtectedRoute allowedRoles={["Super Admin"]}>
                                 <UserManagement />
+                            </RoleProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/audit-logs"
+                        element={
+                            <RoleProtectedRoute allowedRoles={["Super Admin"]}>
+                                <AuditLogs />
+                            </RoleProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/system-config"
+                        element={
+                            <RoleProtectedRoute allowedRoles={["Super Admin"]}>
+                                <SystemConfig />
                             </RoleProtectedRoute>
                         }
                     />

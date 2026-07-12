@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
     getTransactions,
     addTransaction,
@@ -7,19 +6,16 @@ import {
     deleteTransaction,
     getFinanceStats
 } from "../controllers/financeController.js";
-
-import protect from "../middleware/authMiddleware.js";
+import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", protect, getTransactions);
+const financeAllowed = ["Super Admin", "Admin", "Finance Manager", "Accountant"];
 
-router.get("/stats", protect, getFinanceStats);
-
-router.post("/", protect, addTransaction);
-
-router.put("/:id", protect, updateTransaction);
-
-router.delete("/:id", protect, deleteTransaction);
+router.get("/", protect, authorizeRoles(...financeAllowed), getTransactions);
+router.get("/stats", protect, authorizeRoles(...financeAllowed), getFinanceStats);
+router.post("/", protect, authorizeRoles("Super Admin", "Admin", "Finance Manager"), addTransaction);
+router.put("/:id", protect, authorizeRoles("Super Admin", "Admin", "Finance Manager"), updateTransaction);
+router.delete("/:id", protect, authorizeRoles("Super Admin", "Admin", "Finance Manager"), deleteTransaction);
 
 export default router;

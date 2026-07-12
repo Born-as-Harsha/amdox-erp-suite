@@ -166,3 +166,15 @@ export const resetUserPassword = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// Get Audit Logs (Super Admin only)
+export const getAuditLogs = async (req, res) => {
+    try {
+        const logs = await AuditLog.find()
+            .populate("userId", "email")
+            .sort({ createdAt: -1 });
+        res.status(200).json(logs);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

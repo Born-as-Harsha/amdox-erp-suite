@@ -1,92 +1,46 @@
 import "./Layout.css";
-import { useEffect, useState } from "react";
-import {
-    FaBell,
-    FaSearch,
-    FaUserCircle
-} from "react-icons/fa";
+import { FaBell, FaSearch, FaUserCircle } from "react-icons/fa";
 import { useSearch } from "../../context/SearchContext";
+import { useAuth } from "../../context/AuthContext";
 
 function Navbar() {
-    const [user, setUser] = useState({
-        name: "Guest",
-        role: "User",
-        profilePicture: ""
-    });
-
+    const { user } = useAuth();
     const { searchTerm, setSearchTerm } = useSearch();
 
-    const loadUser = () => {
-        try {
-            const storedUser =
-                localStorage.getItem("user") ||
-                sessionStorage.getItem("user");
-
-            if (storedUser) {
-                setUser(JSON.parse(storedUser));
-            }
-        } catch (error) {
-            console.error("Invalid user data", error);
-        }
-    };
-
-    useEffect(() => {
-        loadUser();
-
-        // Sync updates when settings change
-        window.addEventListener("storage", loadUser);
-        return () => {
-            window.removeEventListener("storage", loadUser);
-        };
-    }, []);
+    const name = user?.name || "Guest";
+    const role = user?.role || "User";
+    const profilePicture = user?.profilePicture || "";
 
     return (
-
         <header className="navbar">
-
             <div className="navbar-left">
-
-                <h2 className="erp-title">
-
-                    Amadox ERP
-
-                </h2>
-
+                <h2 className="erp-title">Amadox ERP</h2>
             </div>
 
             <div className="navbar-center">
-
                 <div className="search-box">
-
                     <FaSearch className="search-icon" />
-
                     <input
                         type="text"
                         placeholder="Search employees, finance, inventory..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-
                 </div>
-
             </div>
 
             <div className="navbar-right">
-
                 <button
                     className="notification-btn"
                     type="button"
                 >
-
                     <FaBell />
-
                 </button>
 
                 <div className="profile-info">
-
-                    {user.profilePicture ? (
+                    {profilePicture ? (
                         <img
-                            src={user.profilePicture.startsWith("/uploads/") ? `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${user.profilePicture}` : user.profilePicture}
+                            src={profilePicture.startsWith("/uploads/") ? `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${profilePicture}` : profilePicture}
                             alt="Profile"
                             className="profile-avatar-nav"
                         />
@@ -95,23 +49,13 @@ function Navbar() {
                     )}
 
                     <div>
-
-                        <h4>
-                            {user.name}
-                        </h4>
-
-                        <span>
-                            {user.role}
-                        </span>
-
+                        <h4>{name}</h4>
+                        <span>{role}</span>
                     </div>
-
                 </div>
-
             </div>
-
         </header>
-);
+    );
 }
 
 export default Navbar;

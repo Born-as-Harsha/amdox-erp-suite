@@ -24,6 +24,7 @@ import {
     BarChart, Bar
 } from "recharts";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import {
     getEmployees,
     getInventory,
@@ -34,7 +35,7 @@ import {
 
 function Dashboard() {
     const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+    const { user } = useAuth();
     const [stats, setStats] = useState({
         employees: 0,
         products: 0,
@@ -45,14 +46,6 @@ function Dashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        try {
-            const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-            if (storedUser) {
-                setUser(JSON.parse(storedUser));
-            }
-        } catch (e) {
-            console.error(e);
-        }
         fetchDashboardData();
     }, []);
 
