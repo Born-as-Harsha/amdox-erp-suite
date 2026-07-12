@@ -1,5 +1,6 @@
 import "./Layout.css";
 import { NavLink, useNavigate } from "react-router-dom";
+import { logout as apiLogout } from "../../services/authService";
 import {
     FaTachometerAlt,
     FaUsers,
@@ -36,12 +37,23 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
         console.error(error);
     }
 
-    const logout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        sessionStorage.removeItem("token");
-        sessionStorage.removeItem("user");
-        navigate("/");
+    const logout = async () => {
+        try {
+            const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+            if (storedUser) {
+                const user = JSON.parse(storedUser);
+                await apiLogout(user.email);
+            }
+        } catch (e) {
+            console.error("Logout API error", e);
+        } finally {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            localStorage.removeItem("rememberMeToken");
+            sessionStorage.removeItem("token");
+            sessionStorage.removeItem("user");
+            navigate("/");
+        }
     };
 
     // Helper to render dynamic NavLink

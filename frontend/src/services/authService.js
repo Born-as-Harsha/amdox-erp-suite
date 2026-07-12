@@ -55,6 +55,62 @@ export const register = async (userData) => {
     }
 };
 
+// Logout
+export const logout = async (email) => {
+    try {
+        const response = await api.post("/auth/logout", { email });
+        return response.data;
+    } catch (error) {
+        throw (
+            error.response?.data || {
+                message: "Unable to connect to the server.",
+            }
+        );
+    }
+};
+
+// Forgot Password
+export const forgotPassword = async (email) => {
+    try {
+        const response = await api.post("/auth/forgot-password", { email });
+        return response.data;
+    } catch (error) {
+        throw (
+            error.response?.data || {
+                message: "Unable to connect to the server.",
+            }
+        );
+    }
+};
+
+// Reset Password
+export const resetPassword = async (token, password) => {
+    try {
+        const response = await api.post(`/auth/reset-password/${token}`, { password });
+        return response.data;
+    } catch (error) {
+        throw (
+            error.response?.data || {
+                message: "Unable to connect to the server.",
+            }
+        );
+    }
+};
+
+// Login with Remember Me
+export const loginWithRememberMe = async (token) => {
+    try {
+        const response = await api.post("/auth/remember-me", { token });
+        return response.data;
+    } catch (error) {
+        throw (
+            error.response?.data || {
+                message: "Unable to connect to the server.",
+            }
+        );
+    }
+};
+
 // =====================================
 // USER MANAGEMENT ENDPOINTS (Admin Only)
 // =====================================

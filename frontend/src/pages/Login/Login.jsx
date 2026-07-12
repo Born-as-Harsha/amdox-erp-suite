@@ -1,7 +1,7 @@
 import "./Login.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../../services/authService";
+import { login, loginWithRememberMe } from "../../services/authService";
 import { toast } from "react-toastify";
 
 import {
@@ -21,11 +21,35 @@ function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [autoLoginLoading, setAutoLoginLoading] = useState(false);
 
     const [errors, setErrors] = useState({
         email: "",
         password: "",
     });
+
+    // Check rememberMeToken on mount for auto-login
+    useEffect(() => {
+        const checkAutoLogin = async () => {
+            const token = localStorage.getItem("rememberMeToken");
+            if (token) {
+                setAutoLoginLoading(true);
+                try {
+                    const data = await loginWithRememberMe(token);
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("user", JSON.stringify(data));
+                    toast.success("Welcome back! Auto-login successful.");
+                    navigate("/dashboard", { replace: true });
+                } catch (error) {
+                    // Token expired or invalid, clean up
+                    localStorage.removeItem("rememberMeToken");
+                } finally {
+                    setAutoLoginLoading(false);
+                }
+            }
+        };
+        checkAutoLogin();
+    }, [navigate]);
 
     const validateForm = () => {
         const newErrors = {
@@ -66,20 +90,20 @@ function Login() {
             const data = await login({
                 email,
                 password,
+                rememberMe
             });
 
             // Keep compatibility with ProtectedRoute
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data));
 
-            if (rememberMe) {
-                localStorage.setItem("rememberMe", "true");
+            if (rememberMe && data.rememberMeToken) {
+                localStorage.setItem("rememberMeToken", data.rememberMeToken);
             } else {
-                localStorage.removeItem("rememberMe");
+                localStorage.removeItem("rememberMeToken");
             }
 
             toast.success("Login Successful!");
-
             navigate("/dashboard", { replace: true });
         } catch (error) {
             toast.error(
@@ -91,6 +115,18 @@ function Login() {
             setLoading(false);
         }
     };
+
+    if (autoLoginLoading) {
+        return (
+            <div className="login-page">
+                <div className="login-card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                    <FaSpinner className="spinner" style={{ fontSize: "36px", color: "#2563eb", marginBottom: "15px" }} />
+                    <h2>Restoring Session...</h2>
+                    <p style={{ color: "#64748b", fontSize: "13px" }}>Connecting securely to AMADOX ERP database.</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="login-page">
@@ -190,6 +226,7 @@ function Login() {
                         <button
                             type="button"
                             className="forgot-password"
+                            onClick={() => navigate("/forgot-password")}
                         >
                             Forgot Password?
                         </button>
