@@ -2,6 +2,7 @@ import "./Layout.css";
 import { FaBell, FaSearch, FaUserCircle } from "react-icons/fa";
 import { useSearch } from "../../context/SearchContext";
 import { useAuth } from "../../context/AuthContext";
+import { getAvatarUrl } from "../../utils/helpers";
 
 function Navbar() {
     const { user } = useAuth();
@@ -40,7 +41,7 @@ function Navbar() {
                 <div className="profile-info">
                     {profilePicture ? (
                         <img
-                            src={profilePicture.startsWith("/uploads/") ? `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${profilePicture}` : profilePicture}
+                            src={getAvatarUrl(profilePicture)}
                             alt="Profile"
                             className="profile-avatar-nav"
                         />

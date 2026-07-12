@@ -21,7 +21,7 @@ import {
     FaHistory
 } from "react-icons/fa";
 import { getProfile, updateProfile } from "../../api/settingApi";
-import { convertImageToBase64 } from "../../utils/helpers";
+import { convertImageToBase64, getAvatarUrl } from "../../utils/helpers";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
 
@@ -229,7 +229,7 @@ function Settings() {
                         <div className="avatar-wrapper" onClick={handleAvatarClick}>
                             {formData.profilePicture ? (
                                 <img
-                                    src={formData.profilePicture.startsWith("/uploads/") ? `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${formData.profilePicture}` : formData.profilePicture}
+                                    src={getAvatarUrl(formData.profilePicture)}
                                     alt="Profile Avatar"
                                     className="profile-avatar"
                                 />

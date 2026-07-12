@@ -43,7 +43,7 @@ function AuditLogs() {
 
     const exportCSV = () => {
         const headers = "Timestamp,Email,Action,Details,IP Address\n";
-        const rows = filteredLogs.map(l => `"${new Date(l.createdAt).toLocaleString()}","${l.userId?.email || "System"}","${l.action}","${l.details}","${l.ipAddress}"`).join("\n");
+        const rows = filteredLogs.map(l => `"${new Date(l.timestamp || l.createdAt).toLocaleString()}","${l.userId?.email || "System"}","${l.action}","${l.details}","${l.ipAddress}"`).join("\n");
         const blob = new Blob([headers + rows], { type: "text/csv" });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -113,7 +113,7 @@ function AuditLogs() {
                                 {filteredLogs.length > 0 ? (
                                     filteredLogs.map(l => (
                                         <tr key={l._id}>
-                                            <td style={{ fontSize: "13px" }}>{new Date(l.createdAt).toLocaleString()}</td>
+                                            <td style={{ fontSize: "13px" }}>{new Date(l.timestamp || l.createdAt).toLocaleString()}</td>
                                             <td><strong>{l.userId?.email || "System/Database"}</strong></td>
                                             <td><span className="erp-badge success" style={{ textTransform: "uppercase" }}>{l.action}</span></td>
                                             <td style={{ fontSize: "13px", color: "#475569" }}>{l.details}</td>

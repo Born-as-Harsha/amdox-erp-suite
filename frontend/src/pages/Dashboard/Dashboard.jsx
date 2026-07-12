@@ -25,6 +25,7 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { getAvatarUrl } from "../../utils/helpers";
 import {
     getEmployees,
     getInventory,
@@ -486,7 +487,7 @@ function Dashboard() {
             <div className="dashboard-header-block" style={{ display: "flex", alignItems: "center", gap: "15px" }}>
                 {user?.profilePicture && (
                     <img
-                        src={user.profilePicture.startsWith("/uploads/") ? `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${user.profilePicture}` : user.profilePicture}
+                        src={getAvatarUrl(user.profilePicture)}
                         alt="Profile avatar"
                         style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover", border: "2px solid #2563eb" }}
                     />
