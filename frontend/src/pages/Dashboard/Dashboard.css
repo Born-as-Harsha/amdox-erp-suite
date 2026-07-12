@@ -1,18 +1,4 @@
-/* ===========================
-   DASHBOARD LAYOUT
-=========================== */
 
-.dashboard-layout {
-    display: flex;
-    min-height: calc(100vh - 70px);
-    background: #f5f7fb;
-}
-
-.dashboard-content {
-    flex: 1;
-    padding: 30px;
-    overflow-x: auto;
-}
 
 /* ===========================
    HEADER
@@ -173,6 +159,10 @@
 }
 
 .quick-actions button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     border: none;
     background: #2563eb;
     color: #ffffff;

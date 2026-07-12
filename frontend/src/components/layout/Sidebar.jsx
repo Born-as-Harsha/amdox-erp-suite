@@ -1,15 +1,13 @@
 import "./Layout.css";
 import { NavLink, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-
 import {
     FaTachometerAlt,
     FaUsers,
     FaBoxes,
+    FaMoneyBillWave,
     FaProjectDiagram,
     FaChartBar,
     FaCog,
-    FaMoneyBillWave,
     FaSignOutAlt
 } from "react-icons/fa";
 
@@ -17,11 +15,28 @@ function Sidebar() {
 
     const navigate = useNavigate();
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    let role = "";
 
-    const role = user?.role;
+    try {
 
-    const handleLogout = () => {
+        const storedUser =
+            localStorage.getItem("user") ||
+            sessionStorage.getItem("user");
+
+        if (storedUser) {
+
+            const user = JSON.parse(storedUser);
+            role = user?.role || "";
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+    const logout = () => {
 
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -29,9 +44,7 @@ function Sidebar() {
         sessionStorage.removeItem("token");
         sessionStorage.removeItem("user");
 
-        toast.success("Logged out successfully");
-
-        navigate("/", { replace: true });
+        navigate("/");
 
     };
 
@@ -39,138 +52,163 @@ function Sidebar() {
 
         <aside className="sidebar">
 
-            <div className="sidebar-header">
+            <div>
 
-                <h2>ERP Menu</h2>
+                <div className="sidebar-header">
 
-            </div>
+                    <h2>ERP Menu</h2>
 
-            <nav>
+                </div>
 
-                <ul>
+                <nav>
 
-                    <li>
-
-                        <NavLink
-                            to="/dashboard"
-                            className={({ isActive }) =>
-                                isActive ? "active-link" : ""
-                            }
-                        >
-                            <FaTachometerAlt />
-                            <span>Dashboard</span>
-                        </NavLink>
-
-                    </li>
-
-                    {(role === "Admin" || role === "HR") && (
+                    <ul>
 
                         <li>
 
                             <NavLink
-                                to="/employees"
+                                to="/dashboard"
                                 className={({ isActive }) =>
                                     isActive ? "active-link" : ""
                                 }
                             >
-                                <FaUsers />
-                                <span>Employees</span>
+
+                                <FaTachometerAlt />
+
+                                <span>Dashboard</span>
+
                             </NavLink>
 
                         </li>
 
-                    )}
-
-                    {role === "Admin" && (
-
-                        <>
+                        {(role === "Admin" || role === "HR") && (
 
                             <li>
 
                                 <NavLink
-                                    to="/inventory"
+                                    to="/employees"
                                     className={({ isActive }) =>
                                         isActive ? "active-link" : ""
                                     }
                                 >
-                                    <FaBoxes />
-                                    <span>Inventory</span>
+
+                                    <FaUsers />
+
+                                    <span>Employees</span>
+
                                 </NavLink>
 
                             </li>
 
-                            <li>
+                        )}
 
-                                <NavLink
-                                    to="/finance"
-                                    className={({ isActive }) =>
-                                        isActive ? "active-link" : ""
-                                    }
-                                >
-                                    <FaMoneyBillWave />
-                                    <span>Finance</span>
-                                </NavLink>
+                        {role === "Admin" && (
 
-                            </li>
+                            <>
 
-                            <li>
+                                <li>
 
-                                <NavLink
-                                    to="/projects"
-                                    className={({ isActive }) =>
-                                        isActive ? "active-link" : ""
-                                    }
-                                >
-                                    <FaProjectDiagram />
-                                    <span>Projects</span>
-                                </NavLink>
+                                    <NavLink
+                                        to="/inventory"
+                                        className={({ isActive }) =>
+                                            isActive ? "active-link" : ""
+                                        }
+                                    >
 
-                            </li>
+                                        <FaBoxes />
 
-                            <li>
+                                        <span>Inventory</span>
 
-                                <NavLink
-                                    to="/reports"
-                                    className={({ isActive }) =>
-                                        isActive ? "active-link" : ""
-                                    }
-                                >
-                                    <FaChartBar />
-                                    <span>Reports</span>
-                                </NavLink>
+                                    </NavLink>
 
-                            </li>
+                                </li>
 
-                            <li>
+                                <li>
 
-                                <NavLink
-                                    to="/settings"
-                                    className={({ isActive }) =>
-                                        isActive ? "active-link" : ""
-                                    }
-                                >
-                                    <FaCog />
-                                    <span>Settings</span>
-                                </NavLink>
+                                    <NavLink
+                                        to="/finance"
+                                        className={({ isActive }) =>
+                                            isActive ? "active-link" : ""
+                                        }
+                                    >
 
-                            </li>
+                                        <FaMoneyBillWave />
 
-                        </>
+                                        <span>Finance</span>
 
-                    )}
+                                    </NavLink>
 
-                </ul>
+                                </li>
 
-            </nav>
+                                <li>
+
+                                    <NavLink
+                                        to="/projects"
+                                        className={({ isActive }) =>
+                                            isActive ? "active-link" : ""
+                                        }
+                                    >
+
+                                        <FaProjectDiagram />
+
+                                        <span>Projects</span>
+
+                                    </NavLink>
+
+                                </li>
+
+                                <li>
+
+                                    <NavLink
+                                        to="/reports"
+                                        className={({ isActive }) =>
+                                            isActive ? "active-link" : ""
+                                        }
+                                    >
+
+                                        <FaChartBar />
+
+                                        <span>Reports</span>
+
+                                    </NavLink>
+
+                                </li>
+
+                                <li>
+
+                                    <NavLink
+                                        to="/settings"
+                                        className={({ isActive }) =>
+                                            isActive ? "active-link" : ""
+                                        }
+                                    >
+
+                                        <FaCog />
+
+                                        <span>Settings</span>
+
+                                    </NavLink>
+
+                                </li>
+
+                            </>
+
+                        )}
+
+                    </ul>
+
+                </nav>
+
+            </div>
 
             <button
                 className="logout-btn"
-                onClick={handleLogout}
+                onClick={logout}
             >
 
                 <FaSignOutAlt />
 
-                Logout
+                <span>Logout</span>
 
             </button>
 

@@ -26,6 +26,46 @@ const userSchema = new mongoose.Schema(
                 "Employee"
             ],
             default: "Employee"
+        },
+
+        profilePicture: {
+            type: String,
+            default: ""
+        },
+
+        phone: {
+            type: String,
+            default: ""
+        },
+
+        bio: {
+            type: String,
+            default: ""
+        },
+
+        department: {
+            type: String,
+            default: ""
+        },
+
+        designation: {
+            type: String,
+            default: ""
+        },
+
+        visibility: {
+            type: String,
+            default: "Public"
+        },
+
+        notificationsEnabled: {
+            type: Boolean,
+            default: true
+        },
+
+        theme: {
+            type: String,
+            default: "Light"
         }
     },
     {

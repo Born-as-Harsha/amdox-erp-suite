@@ -11,6 +11,7 @@ import Settings from "./pages/Settings/Settings";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import AppLayout from "./components/layout/AppLayout";
 
 function App() {
 
@@ -26,79 +27,71 @@ function App() {
                 />
 
                 <Route
-                    path="/dashboard"
                     element={
                         <ProtectedRoute>
-                            <Dashboard />
+                            <AppLayout />
                         </ProtectedRoute>
                     }
-                />
+                >
+                    <Route
+                        path="/dashboard"
+                        element={<Dashboard />}
+                    />
 
-                <Route
-                    path="/employees"
-                    element={
-                        <ProtectedRoute>
+                    <Route
+                        path="/employees"
+                        element={
                             <RoleProtectedRoute allowedRoles={["Admin", "HR"]}>
                                 <Employees />
                             </RoleProtectedRoute>
-                        </ProtectedRoute>
-                    }
-                />
+                        }
+                    />
 
-                <Route
-                    path="/inventory"
-                    element={
-                        <ProtectedRoute>
+                    <Route
+                        path="/inventory"
+                        element={
                             <RoleProtectedRoute allowedRoles={["Admin"]}>
                                 <Inventory />
                             </RoleProtectedRoute>
-                        </ProtectedRoute>
-                    }
-                />
+                        }
+                    />
 
-                <Route
-                    path="/finance"
-                    element={
-                        <ProtectedRoute>
+                    <Route
+                        path="/finance"
+                        element={
                             <RoleProtectedRoute allowedRoles={["Admin"]}>
                                 <Finance />
                             </RoleProtectedRoute>
-                        </ProtectedRoute>
-                    }
-                />
+                        }
+                    />
 
-                <Route
-                    path="/projects"
-                    element={
-                        <ProtectedRoute>
+                    <Route
+                        path="/projects"
+                        element={
                             <RoleProtectedRoute allowedRoles={["Admin"]}>
                                 <Projects />
                             </RoleProtectedRoute>
-                        </ProtectedRoute>
-                    }
-                />
+                        }
+                    />
 
-                <Route
-                    path="/reports"
-                    element={
-                        <ProtectedRoute>
+                    <Route
+                        path="/reports"
+                        element={
                             <RoleProtectedRoute allowedRoles={["Admin"]}>
                                 <Reports />
                             </RoleProtectedRoute>
-                        </ProtectedRoute>
-                    }
-                />
+                        }
+                    />
 
-                <Route
-                    path="/settings"
-                    element={
-                        <ProtectedRoute>
+                    <Route
+                        path="/settings"
+                        element={
                             <RoleProtectedRoute allowedRoles={["Admin"]}>
                                 <Settings />
                             </RoleProtectedRoute>
-                        </ProtectedRoute>
-                    }
-                />
+                        }
+                    />
+                </Route>
 
             </Routes>
 

@@ -1,137 +1,570 @@
 import "./Settings.css";
-import { useEffect, useState } from "react";
-
+import { useEffect, useState, useRef } from "react";
 import {
-    getProfile,
-    updateProfile
-} from "../../api/settingApi";
+    FaUserCircle,
+    FaUser,
+    FaBuilding,
+    FaShieldAlt,
+    FaPalette,
+    FaCamera,
+    FaEnvelope,
+    FaPhone,
+    FaLock,
+    FaEye,
+    FaEyeSlash,
+    FaGlobe,
+    FaBell
+} from "react-icons/fa";
+import { getProfile, updateProfile } from "../../api/settingApi";
+import { convertImageToBase64 } from "../../utils/helpers";
 
 function Settings() {
-
     const [formData, setFormData] = useState({
-
         name: "",
-
-        email: ""
-
+        email: "",
+        phone: "",
+        bio: "",
+        department: "",
+        designation: "",
+        visibility: "Public", // Public / Private
+        notificationsEnabled: true,
+        theme: "Light",
+        profilePicture: "",
+        newPassword: "",
+        confirmPassword: ""
     });
 
+    const [role, setRole] = useState("Employee");
+    const [activeTab, setActiveTab] = useState("profile");
+    const [saving, setSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const fileInputRef = useRef(null);
+
     async function fetchProfile() {
-
         try {
-
             const response = await getProfile();
-
+            const data = response.data;
             setFormData({
-
-                name: response.data.name,
-
-                email: response.data.email
-
+                name: data.name || "",
+                email: data.email || "",
+                phone: data.phone || "",
+                bio: data.bio || "",
+                department: data.department || "",
+                designation: data.designation || "",
+                visibility: data.visibility || "Public",
+                notificationsEnabled: data.notificationsEnabled !== undefined ? data.notificationsEnabled : true,
+                theme: data.theme || "Light",
+                profilePicture: data.profilePicture || "",
+                newPassword: "",
+                confirmPassword: ""
             });
-
+            setRole(data.role || "Employee");
+        } catch (error) {
+            console.error("Error fetching profile", error);
+            alert(error.response?.data?.message || "Failed to load profile settings.");
+        } finally {
+            setLoading(false);
         }
-
-        catch (error) {
-
-            alert(error.response?.data?.message || error.message);
-
-        }
-
     }
 
     useEffect(() => {
-         const loadProfile = async () => {
-            await fetchProfile();
-        }           
-
-         loadProfile();
+        fetchProfile();
     }, []);
 
-    async function handleSubmit(e) {
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            try {
+                const base64 = await convertImageToBase64(file, { maxSizeMB: 2 });
+                setFormData((prev) => ({ ...prev, profilePicture: base64 }));
+            } catch (error) {
+                alert(error.message || "Failed to convert image.");
+            }
+        }
+    };
 
-        e.preventDefault();
+    const handleAvatarClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleRemovePhoto = () => {
+        setFormData((prev) => ({ ...prev, profilePicture: "" }));
+    };
+
+    const getInitials = (name) => {
+        if (!name) return "U";
+        const parts = name.trim().split(" ");
+        if (parts.length > 1) {
+            return (parts[0][0] + parts[1][0]).toUpperCase();
+        }
+        return parts[0][0].toUpperCase();
+    };
+
+    async function handleSubmit(e) {
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
+
+        if (formData.newPassword) {
+            if (formData.newPassword.length < 6) {
+                alert("New password must be at least 6 characters long.");
+                return;
+            }
+            if (formData.newPassword !== formData.confirmPassword) {
+                alert("New passwords do not match.");
+                return;
+            }
+        }
+
+        setSaving(true);
 
         try {
+            const submitData = {
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                bio: formData.bio,
+                department: formData.department,
+                designation: formData.designation,
+                visibility: formData.visibility,
+                notificationsEnabled: formData.notificationsEnabled,
+                theme: formData.theme,
+                profilePicture: formData.profilePicture
+            };
 
-            await updateProfile(formData);
+            if (formData.newPassword) {
+                submitData.password = formData.newPassword;
+            }
 
-            alert("Profile Updated Successfully");
+            const response = await updateProfile(submitData);
 
+            // Sync with localStorage user key for header/sidebar updates
+            const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
+            if (storedUser) {
+                const user = JSON.parse(storedUser);
+                const updatedUser = {
+                    ...user,
+                    name: response.data.name,
+                    email: response.data.email,
+                    profilePicture: response.data.profilePicture
+                };
+                if (localStorage.getItem("user")) {
+                    localStorage.setItem("user", JSON.stringify(updatedUser));
+                } else {
+                    sessionStorage.setItem("user", JSON.stringify(updatedUser));
+                }
+            }
+
+            alert("Profile settings updated successfully!");
+            
+            // Clear passwords
+            setFormData(prev => ({
+                ...prev,
+                newPassword: "",
+                confirmPassword: ""
+            }));
+
+            // Dispatch global storage event so header refreshes immediately
+            window.dispatchEvent(new Event("storage"));
+
+        } catch (error) {
+            console.error("Error saving settings", error);
+            alert(error.response?.data?.message || "Failed to save profile settings.");
+        } finally {
+            setSaving(false);
         }
+    }
 
-        catch (error) {
-
-            alert(error.response?.data?.message || error.message);
-
-        }
-
+    if (loading) {
+        return (
+            <div className="settings-loading">
+                <div className="spinner-large"></div>
+                <h2>Loading System Settings...</h2>
+            </div>
+        );
     }
 
     return (
+        <div className="settings-container">
+            <div className="settings-header">
+                <div>
+                    <h1>Enterprise Settings</h1>
+                    <p>Manage your account settings, personal details, system preferences, and security options.</p>
+                </div>
+            </div>
 
-        <div className="settings">
+            <div className="settings-layout">
+                {/* Left Profile Overview Card */}
+                <div className="settings-card profile-summary-card">
+                    <div className="profile-photo-container">
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            style={{ display: "none" }}
+                            accept="image/*"
+                            onChange={handleFileChange}
+                        />
+                        <div className="avatar-wrapper" onClick={handleAvatarClick}>
+                            {formData.profilePicture ? (
+                                <img
+                                    src={formData.profilePicture}
+                                    alt="Profile Avatar"
+                                    className="profile-avatar"
+                                />
+                            ) : (
+                                <div className="initials-avatar">{getInitials(formData.name)}</div>
+                            )}
+                            <div className="avatar-hover-overlay">
+                                <FaCamera />
+                                <span>Update Photo</span>
+                            </div>
+                        </div>
 
-            <h1>Settings</h1>
+                        {formData.profilePicture && (
+                            <button
+                                type="button"
+                                className="remove-photo-btn"
+                                onClick={handleRemovePhoto}
+                            >
+                                Remove Photo
+                            </button>
+                        )}
+                    </div>
 
-            <form onSubmit={handleSubmit}>
+                    <div className="profile-details-summary">
+                        <h2>{formData.name || "User Name"}</h2>
+                        <span className="role-badge">{role}</span>
+                        <div className={`visibility-badge ${formData.visibility.toLowerCase()}`}>
+                            <FaGlobe /> {formData.visibility} Profile
+                        </div>
+                    </div>
 
-                <label>Name</label>
+                    <div className="profile-job-meta">
+                        <div className="meta-row">
+                            <span className="meta-label">Department:</span>
+                            <span className="meta-value">{formData.department || "Not Specified"}</span>
+                        </div>
+                        <div className="meta-row">
+                            <span className="meta-label">Designation:</span>
+                            <span className="meta-value">{formData.designation || "Not Specified"}</span>
+                        </div>
+                    </div>
+                </div>
 
-                <input
+                {/* Right Form Configuration Panel */}
+                <div className="settings-card settings-form-card">
+                    <div className="settings-tabs">
+                        <button
+                            type="button"
+                            className={`tab-btn ${activeTab === "profile" ? "active" : ""}`}
+                            onClick={() => setActiveTab("profile")}
+                        >
+                            <FaUser /> Personal Info
+                        </button>
+                        <button
+                            type="button"
+                            className={`tab-btn ${activeTab === "org" ? "active" : ""}`}
+                            onClick={() => setActiveTab("org")}
+                        >
+                            <FaBuilding /> Job Details
+                        </button>
+                        <button
+                            type="button"
+                            className={`tab-btn ${activeTab === "privacy" ? "active" : ""}`}
+                            onClick={() => setActiveTab("privacy")}
+                        >
+                            <FaShieldAlt /> Security & Privacy
+                        </button>
+                        <button
+                            type="button"
+                            className={`tab-btn ${activeTab === "preferences" ? "active" : ""}`}
+                            onClick={() => setActiveTab("preferences")}
+                        >
+                            <FaPalette /> Preferences
+                        </button>
+                    </div>
 
-                    type="text"
+                    <form onSubmit={handleSubmit} className="settings-form">
+                        <div className="tab-content">
+                            {/* Tab 1: Personal Info */}
+                            {activeTab === "profile" && (
+                                <div className="tab-pane">
+                                    <h3>Personal Details</h3>
+                                    <p className="tab-desc">Update your personal contact details and public bio.</p>
 
-                    value={formData.name}
+                                    <div className="form-grid">
+                                        <div className="form-group-full">
+                                            <label>Full Name</label>
+                                            <div className="input-with-icon">
+                                                <FaUser className="input-left-icon" />
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    value={formData.name}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, name: e.target.value })
+                                                    }
+                                                    placeholder="John Doe"
+                                                />
+                                            </div>
+                                        </div>
 
-                    onChange={(e) =>
+                                        <div className="form-group-half">
+                                            <label>Email Address</label>
+                                            <div className="input-with-icon">
+                                                <FaEnvelope className="input-left-icon" />
+                                                <input
+                                                    type="email"
+                                                    required
+                                                    value={formData.email}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, email: e.target.value })
+                                                    }
+                                                    placeholder="email@company.com"
+                                                />
+                                            </div>
+                                        </div>
 
-                        setFormData({
+                                        <div className="form-group-half">
+                                            <label>Phone Number</label>
+                                            <div className="input-with-icon">
+                                                <FaPhone className="input-left-icon" />
+                                                <input
+                                                    type="text"
+                                                    value={formData.phone}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, phone: e.target.value })
+                                                    }
+                                                    placeholder="+91 98765 43210"
+                                                />
+                                            </div>
+                                        </div>
 
-                            ...formData,
+                                        <div className="form-group-full">
+                                            <label>Biography / Description</label>
+                                            <textarea
+                                                rows="4"
+                                                value={formData.bio}
+                                                onChange={(e) =>
+                                                    setFormData({ ...formData, bio: e.target.value })
+                                                }
+                                                placeholder="Write a brief introduction about yourself..."
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
-                            name: e.target.value
+                            {/* Tab 2: Job Details */}
+                            {activeTab === "org" && (
+                                <div className="tab-pane">
+                                    <h3>Organization Details</h3>
+                                    <p className="tab-desc">Verify your department, designation, and global system authorization level.</p>
 
-                        })
+                                    <div className="form-grid">
+                                        <div className="form-group-half">
+                                            <label>Department</label>
+                                            <div className="input-with-icon">
+                                                <FaBuilding className="input-left-icon" />
+                                                <input
+                                                    type="text"
+                                                    value={formData.department}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, department: e.target.value })
+                                                    }
+                                                    placeholder="Engineering / Sales / HR"
+                                                />
+                                            </div>
+                                        </div>
 
-                    }
+                                        <div className="form-group-half">
+                                            <label>Designation</label>
+                                            <div className="input-with-icon">
+                                                <FaBuilding className="input-left-icon" />
+                                                <input
+                                                    type="text"
+                                                    value={formData.designation}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, designation: e.target.value })
+                                                    }
+                                                    placeholder="e.g. Senior Architect"
+                                                />
+                                            </div>
+                                        </div>
 
-                />
+                                        <div className="form-group-full">
+                                            <label>System Authorization Level (Read-Only)</label>
+                                            <div className="input-with-icon readonly-input">
+                                                <FaShieldAlt className="input-left-icon" />
+                                                <input
+                                                    type="text"
+                                                    value={role}
+                                                    disabled
+                                                    style={{ cursor: "not-allowed" }}
+                                                />
+                                            </div>
+                                            <small className="help-text">Contact your system administrator to modify security authorization levels.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
-                <label>Email</label>
+                            {/* Tab 3: Security & Privacy */}
+                            {activeTab === "privacy" && (
+                                <div className="tab-pane">
+                                    <h3>Privacy & Security Controls</h3>
+                                    <p className="tab-desc">Toggle profile listing visibility options and update login authorization credentials.</p>
 
-                <input
+                                    <div className="settings-section">
+                                        <h4>Profile Directory Visibility</h4>
+                                        <div className="toggle-option-card">
+                                            <div className="toggle-info">
+                                                <h5>Visibility Setting</h5>
+                                                <p>When set to <strong>Public</strong>, your contact details, designation, and bio will be visible to other team members in the corporate directories.</p>
+                                            </div>
+                                            <div className="select-wrapper">
+                                                <select
+                                                    value={formData.visibility}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, visibility: e.target.value })
+                                                    }
+                                                >
+                                                    <option value="Public">Public (Directory Listing)</option>
+                                                    <option value="Private">Private (Hidden)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                    type="email"
+                                    <hr className="divider" />
 
-                    value={formData.email}
+                                    <div className="settings-section">
+                                        <h4>Update Password</h4>
+                                        <div className="form-grid">
+                                            <div className="form-group-half">
+                                                <label>New Password</label>
+                                                <div className="input-with-icon">
+                                                    <FaLock className="input-left-icon" />
+                                                    <input
+                                                        type={showNewPassword ? "text" : "password"}
+                                                        value={formData.newPassword}
+                                                        onChange={(e) =>
+                                                            setFormData({ ...formData, newPassword: e.target.value })
+                                                        }
+                                                        placeholder="Enter new password"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="password-eye-btn"
+                                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                                    >
+                                                        {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                                                    </button>
+                                                </div>
+                                            </div>
 
-                    onChange={(e) =>
+                                            <div className="form-group-half">
+                                                <label>Confirm Password</label>
+                                                <div className="input-with-icon">
+                                                    <FaLock className="input-left-icon" />
+                                                    <input
+                                                        type={showConfirmPassword ? "text" : "password"}
+                                                        value={formData.confirmPassword}
+                                                        onChange={(e) =>
+                                                            setFormData({ ...formData, confirmPassword: e.target.value })
+                                                        }
+                                                        placeholder="Confirm new password"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="password-eye-btn"
+                                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                    >
+                                                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
-                        setFormData({
+                            {/* Tab 4: Preferences */}
+                            {activeTab === "preferences" && (
+                                <div className="tab-pane">
+                                    <h3>System Preferences</h3>
+                                    <p className="tab-desc">Personalize notification policies and visual settings for your account.</p>
 
-                            ...formData,
+                                    <div className="settings-section">
+                                        <h4>Corporate Notifications</h4>
+                                        <div className="toggle-option-card">
+                                            <div className="toggle-info">
+                                                <h5>Enable Email Notifications</h5>
+                                                <p>Receive weekly project status logs, inventory alerts, and HR reminders directly inside your email inbox.</p>
+                                            </div>
+                                            <div className="switch-wrapper">
+                                                <label className="toggle-switch">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.notificationsEnabled}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                notificationsEnabled: e.target.checked
+                                                            })
+                                                        }
+                                                    />
+                                                    <span className="slider round"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            email: e.target.value
+                                    <hr className="divider" />
 
-                        })
+                                    <div className="settings-section">
+                                        <h4>User Interface Theme</h4>
+                                        <div className="toggle-option-card">
+                                            <div className="toggle-info">
+                                                <h5>Theme Selection</h5>
+                                                <p>Switch between the standard light interface style or modern dark themes.</p>
+                                            </div>
+                                            <div className="select-wrapper">
+                                                <select
+                                                    value={formData.theme}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, theme: e.target.value })
+                                                    }
+                                                >
+                                                    <option value="Light">Enterprise Light</option>
+                                                    <option value="Dark">Developer Dark</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
-                    }
-
-                />
-
-                <button type="submit">
-
-                    Save Changes
-
-                </button>
-
-            </form>
-
+                        <div className="settings-form-actions">
+                            <button
+                                type="submit"
+                                className="settings-submit-btn"
+                                disabled={saving}
+                            >
+                                {saving ? "Saving Changes..." : "Save Configuration"}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
     );
-
 }
 
 export default Settings;

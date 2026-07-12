@@ -1,7 +1,9 @@
 import "./Layout.css";
 
 function Footer() {
+
     return (
+
         <footer className="footer">
 
             <div className="footer-left">
@@ -16,12 +18,16 @@ function Footer() {
 
             <div className="footer-right">
 
-                <span>Version 1.0.0</span>
+                <span>
+                    Version 1.0.0
+                </span>
 
             </div>
 
         </footer>
+
     );
+
 }
 
 export default Footer;
