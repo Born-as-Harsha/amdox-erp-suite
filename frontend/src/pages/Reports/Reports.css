@@ -1,172 +1,248 @@
-.reports {
-    padding: 25px;
-    background: #f5f7fb;
-    min-height: 100vh;
+/* ======================================================
+   ENTERPRISE REPORTS MODULE STYLING
+   ====================================================== */
+
+.reports-view-container {
+    padding: 30px;
+    background: #f8fafc;
+    min-height: calc(100vh - 140px);
 }
 
-.reports-header {
+.reports-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 30px;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
-.reports-header h1 {
-    color: #1f2937;
-    font-size: 30px;
+.reports-header-row h1 {
+    font-size: 28px;
     font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
 }
 
-.reports-header button {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 12px 22px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 15px;
-    transition: 0.3s;
-}
-
-.reports-header button:hover {
-    background: #1d4ed8;
-}
-
-.search-box {
-    margin-bottom: 20px;
-}
-
-.search-box input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    outline: none;
+.reports-header-row p {
+    color: #64748b;
     font-size: 15px;
 }
 
-.search-box input:focus {
-    border-color: #2563eb;
+.reports-actions-row {
+    display: flex;
+    gap: 12px;
 }
 
-.report-stats {
+/* Metrics Cards Grid */
+.reports-metrics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     margin-bottom: 30px;
 }
 
-.stat-card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-
-.stat-card h3 {
-    color: #6b7280;
-    font-size: 16px;
-    margin-bottom: 10px;
-}
-
-.stat-card p {
-    font-size: 28px;
-    font-weight: bold;
-    color: #2563eb;
-}
-
-.table-title {
-    margin-bottom: 15px;
-    color: #1f2937;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-
-thead {
-    background: #2563eb;
-    color: white;
-}
-
-th,
-td {
-    padding: 14px;
-    text-align: center;
-}
-
-tbody tr {
-    border-bottom: 1px solid #e5e7eb;
-}
-
-tbody tr:hover {
-    background: #f9fafb;
-}
-
-.status {
-    padding: 6px 12px;
-    border-radius: 20px;
-    color: white;
+.rep-metric-card h3 {
     font-size: 13px;
     font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
 }
 
-.generated {
-    background: #16a34a;
+.rep-metric-card h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 2px;
 }
 
-.pending {
-    background: #f59e0b;
+.rep-metric-card small {
+    font-size: 12px;
+    color: #94a3b8;
 }
 
-.archived {
-    background: #6b7280;
+/* Charts list */
+.reports-charts-row {
+    margin-bottom: 30px;
 }
 
-.edit-btn,
-.delete-btn {
+.reports-chart-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.reports-chart-card p {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 20px;
+}
+
+/* Spinner */
+.reports-loading-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 140px);
+    gap: 16px;
+    color: #64748b;
+}
+
+.reports-loading-view svg {
+    font-size: 38px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Sort & Icons */
+.sort-icon-muted {
+    opacity: 0.3;
+}
+
+table th svg {
+    margin-left: 6px;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+/* Table action buttons */
+.edit-icon-btn,
+.delete-icon-btn {
+    background: transparent;
     border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
     cursor: pointer;
-    margin: 2px;
-    font-size: 14px;
+    font-size: 16px;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    margin-right: 6px;
 }
 
-.edit-btn {
-    background: #2563eb;
-    color: white;
+.edit-icon-btn {
+    color: #16a34a;
 }
 
-.edit-btn:hover {
-    background: #1d4ed8;
+.edit-icon-btn:hover {
+    background: #f0fdf4;
 }
 
-.delete-btn {
-    background: #dc2626;
-    color: white;
+.delete-icon-btn {
+    color: #ef4444;
 }
 
-.delete-btn:hover {
-    background: #b91c1c;
+.delete-icon-btn:hover {
+    background: #fef2f2;
 }
 
-@media (max-width:768px) {
+/* Modals */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    padding: 20px;
+}
 
-    .reports-header {
+.modal-form-card {
+    width: 100%;
+    max-width: 580px;
+    padding: 30px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-form-card h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 24px;
+}
+
+.modal-grid-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.modal-grid-form .erp-form-group {
+    grid-column: span 1;
+}
+
+.modal-grid-form .erp-form-group-full {
+    grid-column: span 2;
+}
+
+.modal-actions-row {
+    grid-column: span 2;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Printing styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .reports-view-container {
+        padding: 0 !important;
+        background: transparent !important;
+    }
+    .erp-table-container {
+        box-shadow: none !important;
+        border: none !important;
+    }
+    .erp-table th {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+    }
+}
+
+/* Responsive Overrides */
+@media (max-width: 992px) {
+    .reports-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .reports-metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    .reports-header-row {
         flex-direction: column;
-        gap: 15px;
+        align-items: flex-start;
     }
-
-    table {
-        display: block;
-        overflow-x: auto;
+    .reports-actions-row {
+        width: 100%;
+        margin-top: 10px;
     }
+    .reports-actions-row button {
+        flex: 1;
+    }
+}
 
+@media (max-width: 576px) {
+    .modal-grid-form {
+        grid-template-columns: 1fr;
+    }
+    .modal-grid-form .erp-form-group {
+        grid-column: span 2;
+    }
 }

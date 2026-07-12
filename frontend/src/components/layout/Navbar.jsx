@@ -5,6 +5,7 @@ import {
     FaSearch,
     FaUserCircle
 } from "react-icons/fa";
+import { useSearch } from "../../context/SearchContext";
 
 function Navbar() {
     const [user, setUser] = useState({
@@ -12,6 +13,8 @@ function Navbar() {
         role: "User",
         profilePicture: ""
     });
+
+    const { searchTerm, setSearchTerm } = useSearch();
 
     const loadUser = () => {
         try {
@@ -60,6 +63,8 @@ function Navbar() {
                     <input
                         type="text"
                         placeholder="Search employees, finance, inventory..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                     />
 
                 </div>

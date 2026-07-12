@@ -1,6 +1,5 @@
 import "./Reports.css";
-import { useEffect, useState } from "react";
-
+import { useEffect, useMemo, useState } from "react";
 import {
     getReports,
     addReport,
@@ -8,270 +7,529 @@ import {
     deleteReport,
     getReportStats
 } from "../../api/reportApi";
-
-import ReportTable from "./ReportTable";
-import ReportStats from "./ReportStats";
-import ReportModal from "./ReportModal";
-import SearchBar from "./SearchBar";
+import { useSearch } from "../../context/SearchContext";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { FaPlus, FaSort, FaSortUp, FaSortDown, FaEdit, FaTrash, FaDownload, FaPrint, FaSpinner } from "react-icons/fa";
 
 function Reports() {
-
-    const [reports, setReports] = useState([]);
-    const [stats, setStats] = useState({});
-    const [loading, setLoading] = useState(true);
-
-    const [searchTerm, setSearchTerm] = useState("");
-
-    const [showModal, setShowModal] = useState(false);
-
-    const [editingId, setEditingId] = useState(null);
-
-    const [formData, setFormData] = useState({
+    const initialFormState = {
         reportId: "",
         reportName: "",
         category: "",
         generatedBy: "",
         status: "Generated"
+    };
+
+    const [reports, setReports] = useState([]);
+    const [stats, setStats] = useState({
+        totalReports: 0,
+        generated: 0,
+        pending: 0
     });
+    const [loading, setLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [formData, setFormData] = useState(initialFormState);
+    const [saving, setSaving] = useState(false);
 
-    async function fetchReports() {
-
-        try {
-
-            const response = await getReports();
-
-            setReports(response.data);
-
-            const statResponse = await getReportStats();
-
-            setStats(statResponse.data);
-
-        }
-
-        catch (error) {
-
-            alert(error.response?.data?.message || error.message);
-
-        }
-
-        finally {
-
-            setLoading(false);
-
-        }
-
-    }
+    // Filtering, sorting and paging state
+    const { searchTerm } = useSearch();
+    const [selectedCategory, setSelectedCategory] = useState("All");
+    const [selectedStatus, setSelectedStatus] = useState("All");
+    const [sortBy, setSortBy] = useState("createdDate");
+    const [sortDirection, setSortDirection] = useState("desc");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
 
     useEffect(() => {
-
-        const loadReports = async () => {
-
-            await fetchReports();
-
-        };
-
-        loadReports();
-
+        loadReportsData();
     }, []);
 
-    async function handleSave() {
+    // Reset pagination on filter update
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, selectedCategory, selectedStatus]);
 
+    async function loadReportsData() {
+        setLoading(true);
         try {
-
-            if (editingId) {
-
-                await updateReport(editingId, formData);
-
-                alert("Report Updated Successfully");
-
-            }
-
-            else {
-
-                await addReport(formData);
-
-                alert("Report Added Successfully");
-
-            }
-
-            setEditingId(null);
-
-            setShowModal(false);
-
-            setFormData({
-
-                reportId: "",
-                reportName: "",
-                category: "",
-                generatedBy: "",
-                status: "Generated"
-
-            });
-
-            await fetchReports();
-
+            const [repRes, statsRes] = await Promise.all([
+                getReports(),
+                getReportStats()
+            ]);
+            setReports(Array.isArray(repRes?.data) ? repRes.data : []);
+            setStats(statsRes?.data || { totalReports: 0, generated: 0, pending: 0 });
+        } catch (error) {
+            console.error("Load reports data error", error);
+        } finally {
+            setLoading(false);
         }
-
-        catch (error) {
-
-            alert(error.response?.data?.message || error.message);
-
-        }
-
     }
 
-    function handleEdit(report) {
-
-        setEditingId(report._id);
-
-        setFormData({
-
-            reportId: report.reportId,
-            reportName: report.reportName,
-            category: report.category,
-            generatedBy: report.generatedBy,
-            status: report.status
-
-        });
-
+    const openAddModal = () => {
+        setFormData(initialFormState);
+        setEditingId(null);
         setShowModal(true);
+    };
 
-    }
+    const handleEdit = (report) => {
+        setEditingId(report._id);
+        setFormData({
+            reportId: report.reportId || "",
+            reportName: report.reportName || "",
+            category: report.category || "",
+            generatedBy: report.generatedBy || "",
+            status: report.status || "Generated"
+        });
+        setShowModal(true);
+    };
 
-    async function handleDelete(id) {
-
-        const confirmDelete = window.confirm(
-            "Are you sure you want to delete this report?"
-        );
-
+    const handleDelete = async (id) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this report?");
         if (!confirmDelete) return;
 
         try {
-
             await deleteReport(id);
+            await loadReportsData();
+        } catch (error) {
+            console.error(error);
+            alert("Failed to delete report.");
+        }
+    };
 
-            alert("Report Deleted Successfully");
+    const handleSave = async (e) => {
+        e.preventDefault();
 
-            await fetchReports();
-
+        if (
+            !formData.reportId.trim() ||
+            !formData.reportName.trim() ||
+            !formData.category.trim() ||
+            !formData.generatedBy.trim()
+        ) {
+            alert("Please fill all fields before saving.");
+            return;
         }
 
-        catch (error) {
+        setSaving(true);
+        const payload = {
+            reportId: formData.reportId.trim(),
+            reportName: formData.reportName.trim(),
+            category: formData.category.trim(),
+            generatedBy: formData.generatedBy.trim(),
+            status: formData.status
+        };
 
-            alert(error.response?.data?.message || error.message);
+        try {
+            if (editingId) {
+                await updateReport(editingId, payload);
+            } else {
+                await addReport(payload);
+            }
+            await loadReportsData();
+            setShowModal(false);
+            setFormData(initialFormState);
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data?.message || "Failed to save report.");
+        } finally {
+            setSaving(false);
+        }
+    };
 
+    // CSV Download stream builder (built-in XML/CSV generation)
+    const exportToCSV = () => {
+        if (reports.length === 0) {
+            alert("No reports available to export.");
+            return;
         }
 
-    }
+        const headers = ["Report ID", "Report Name", "Category", "Generated By", "Date", "Status"];
+        const rows = reports.map((r) => [
+            r.reportId,
+            r.reportName,
+            r.category,
+            r.generatedBy,
+            new Date(r.createdDate || r.createdAt).toLocaleDateString(),
+            r.status
+        ]);
 
-    const filteredReports = reports.filter((report) => {
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + [headers.join(","), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))].join("\n");
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `AMADOX_Reports_Inventory_${new Date().toISOString().substring(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
-        return (
+    // Print/PDF export helper
+    const triggerPrint = () => {
+        window.print();
+    };
 
-            report.reportName
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
+    // Unique Categories list
+    const categoryOptions = useMemo(() => {
+        const categories = new Set(reports.map(r => r.category).filter(Boolean));
+        return ["All", ...Array.from(categories)];
+    }, [reports]);
 
-            report.category
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
+    // Sorting trigger
+    const triggerSort = (column) => {
+        if (sortBy === column) {
+            setSortDirection(prev => prev === "asc" ? "desc" : "asc");
+        } else {
+            setSortBy(column);
+            setSortDirection("asc");
+        }
+    };
 
-            report.generatedBy
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())
+    // Render sorting icon
+    const renderSortIcon = (column) => {
+        if (sortBy !== column) return <FaSort className="sort-icon-muted" />;
+        return sortDirection === "asc" ? <FaSortUp /> : <FaSortDown />;
+    };
 
-        );
+    // Recharts Bar chart dataset (summarizing reports count by category)
+    const categoryChartData = useMemo(() => {
+        const categoriesMap = {};
+        reports.forEach(r => {
+            if (r.category) {
+                categoriesMap[r.category] = (categoriesMap[r.category] || 0) + 1;
+            }
+        });
+        return Object.keys(categoriesMap).map(cat => ({
+            name: cat,
+            value: categoriesMap[cat]
+        }));
+    }, [reports]);
 
-    });
+    // Search, Filter, Sort processing
+    const filteredReports = useMemo(() => {
+        let result = [...reports];
+
+        // 1. Search Filter
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            result = result.filter(
+                (r) =>
+                    (r.reportName || "").toLowerCase().includes(term) ||
+                    (r.reportId || "").toLowerCase().includes(term) ||
+                    (r.category || "").toLowerCase().includes(term) ||
+                    (r.generatedBy || "").toLowerCase().includes(term)
+            );
+        }
+
+        // 2. Category Filter
+        if (selectedCategory && selectedCategory !== "All") {
+            result = result.filter(r => r.category === selectedCategory);
+        }
+
+        // 3. Status Filter
+        if (selectedStatus && selectedStatus !== "All") {
+            result = result.filter(r => r.status === selectedStatus);
+        }
+
+        // 4. Sort
+        if (sortBy) {
+            result.sort((a, b) => {
+                let valA = a[sortBy];
+                let valB = b[sortBy];
+
+                if (sortBy === "createdDate" || sortBy === "createdAt") {
+                    valA = new Date(valA || a.createdAt).getTime();
+                    valB = new Date(valB || b.createdAt).getTime();
+                } else if (typeof valA === "string") {
+                    valA = valA.toLowerCase();
+                    valB = (valB || "").toLowerCase();
+                }
+
+                if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+                if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+                return 0;
+            });
+        }
+
+        return result;
+    }, [reports, searchTerm, selectedCategory, selectedStatus, sortBy, sortDirection]);
+
+    // Paginate subset
+    const paginatedReports = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return filteredReports.slice(startIndex, startIndex + itemsPerPage);
+    }, [filteredReports, currentPage, itemsPerPage]);
+
+    const totalPages = Math.ceil(filteredReports.length / itemsPerPage) || 1;
 
     if (loading) {
-
-        return <h2 style={{ padding: "20px" }}>Loading...</h2>;
-
+        return (
+            <div className="reports-loading-view">
+                <FaSpinner className="spinner" />
+                <h2>Loading System Reports...</h2>
+            </div>
+        );
     }
 
     return (
-
-        <div className="reports">
-
-            <div className="reports-header">
-
-                <h1>Report Management</h1>
-
-                <button
-
-                    onClick={() => {
-
-                        setEditingId(null);
-
-                        setFormData({
-
-                            reportId: "",
-                            reportName: "",
-                            category: "",
-                            generatedBy: "",
-                            status: "Generated"
-
-                        });
-
-                        setShowModal(true);
-
-                    }}
-
-                >
-
-                    Add Report
-
-                </button>
-
+        <div className="reports-view-container">
+            <div className="reports-header-row no-print">
+                <div>
+                    <h1>Reports Audit Logs</h1>
+                    <p>Compile reports, audit historical sheets, export records, and analyze distributions.</p>
+                </div>
+                <div className="reports-actions-row">
+                    <button type="button" className="erp-btn-secondary" onClick={exportToCSV} title="Export CSV/Excel">
+                        <FaDownload /> Export CSV
+                    </button>
+                    <button type="button" className="erp-btn-secondary" onClick={triggerPrint} title="PDF Print">
+                        <FaPrint /> Print / PDF
+                    </button>
+                    <button type="button" className="erp-btn-primary" onClick={openAddModal}>
+                        <FaPlus /> Compile Report
+                    </button>
+                </div>
             </div>
 
-            <SearchBar
+            {/* KPI metrics row */}
+            <div className="reports-metrics-grid">
+                <div className="erp-card rep-metric-card">
+                    <h3>Total Compiled</h3>
+                    <h2>{stats.totalReports}</h2>
+                    <small>System logs</small>
+                </div>
+                <div className="erp-card rep-metric-card">
+                    <h3>Success Generated</h3>
+                    <h2>{stats.generated}</h2>
+                    <small>Fully finalized</small>
+                </div>
+                <div className="erp-card rep-metric-card">
+                    <h3>Pending Compile</h3>
+                    <h2>{stats.pending}</h2>
+                    <small>Scheduled pipeline</small>
+                </div>
+            </div>
 
-                searchTerm={searchTerm}
+            {/* Visual breakdown chart */}
+            {categoryChartData.length > 0 && (
+                <div className="reports-charts-row no-print">
+                    <div className="erp-card reports-chart-card">
+                        <h3>Report Distributions by Category</h3>
+                        <p>Distribution counts of generated analytics across active business modules.</p>
+                        <div style={{ width: "100%", height: 260 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={categoryChartData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                    <XAxis dataKey="name" stroke="#64748b" fontSize={11} />
+                                    <YAxis stroke="#64748b" fontSize={11} />
+                                    <Tooltip />
+                                    <Bar dataKey="value" fill="#2563eb" radius={[4, 4, 0, 0]} barSize={40} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                setSearchTerm={setSearchTerm}
+            {/* Filters Row */}
+            <div className="erp-filters-bar no-print">
+                <div className="filter-group">
+                    <span className="filter-label">Category:</span>
+                    <select
+                        className="erp-filter-select"
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                    >
+                        {categoryOptions.map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+                </div>
 
-            />
+                <div className="filter-group">
+                    <span className="filter-label">Status:</span>
+                    <select
+                        className="erp-filter-select"
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                    >
+                        <option value="All">All Statuses</option>
+                        <option value="Generated">Generated</option>
+                        <option value="Pending">Pending</option>
+                    </select>
+                </div>
+            </div>
 
-            <ReportStats
+            {/* Main Reports Table */}
+            <div className="erp-table-container">
+                <table className="erp-table">
+                    <thead>
+                        <tr>
+                            <th style={{ cursor: "pointer" }} onClick={() => triggerSort("reportId")}>
+                                Report ID {renderSortIcon("reportId")}
+                            </th>
+                            <th style={{ cursor: "pointer" }} onClick={() => triggerSort("reportName")}>
+                                Report Name {renderSortIcon("reportName")}
+                            </th>
+                            <th style={{ cursor: "pointer" }} onClick={() => triggerSort("category")}>
+                                Category {renderSortIcon("category")}
+                            </th>
+                            <th>Compiled By</th>
+                            <th style={{ cursor: "pointer" }} onClick={() => triggerSort("createdDate")}>
+                                Compiled Date {renderSortIcon("createdDate")}
+                            </th>
+                            <th>Status</th>
+                            <th className="no-print">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {paginatedReports.length > 0 ? (
+                            paginatedReports.map((r) => (
+                                <tr key={r._id}>
+                                    <td><strong>{r.reportId}</strong></td>
+                                    <td>{r.reportName}</td>
+                                    <td>{r.category}</td>
+                                    <td>{r.generatedBy}</td>
+                                    <td>{new Date(r.createdDate || r.createdAt).toLocaleDateString()}</td>
+                                    <td>
+                                        <span className={`erp-badge ${r.status === "Generated" ? "success" : "pending"}`}>
+                                            {r.status}
+                                        </span>
+                                    </td>
+                                    <td className="no-print">
+                                        <button
+                                            type="button"
+                                            className="edit-icon-btn"
+                                            onClick={() => handleEdit(r)}
+                                            title="Edit"
+                                        >
+                                            <FaEdit />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="delete-icon-btn"
+                                            onClick={() => handleDelete(r._id)}
+                                            title="Delete"
+                                        >
+                                            <FaTrash />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="7" style={{ textAlign: "center", padding: "30px", color: "#64748b" }}>
+                                    No matching compiled reports found.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
 
-                stats={stats}
+                {/* Table Paginator */}
+                <div className="erp-pagination no-print">
+                    <span className="erp-pagination-info">
+                        Showing Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong> ({filteredReports.length} total reports)
+                    </span>
+                    <div className="erp-pagination-buttons">
+                        <button
+                            type="button"
+                            className="erp-pagination-btn"
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        >
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="erp-pagination-btn"
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-                reports={reports}
+            {/* Modal Dialog Form */}
+            {showModal && (
+                <div className="modal-backdrop no-print">
+                    <div className="erp-card modal-form-card">
+                        <h2>{editingId ? "Modify Compilation Parameters" : "Compile System Report Sheet"}</h2>
+                        <form onSubmit={handleSave} className="modal-grid-form">
+                            <div className="erp-form-group">
+                                <label>Report Code ID</label>
+                                <input
+                                    type="text"
+                                    className="erp-input"
+                                    value={formData.reportId}
+                                    onChange={(e) => setFormData({ ...formData, reportId: e.target.value })}
+                                    disabled={Boolean(editingId)}
+                                    placeholder="REP403"
+                                />
+                            </div>
 
-            />
+                            <div className="erp-form-group">
+                                <label>Report Name</label>
+                                <input
+                                    type="text"
+                                    className="erp-input"
+                                    value={formData.reportName}
+                                    onChange={(e) => setFormData({ ...formData, reportName: e.target.value })}
+                                    placeholder="Q3 Logistics Audit"
+                                />
+                            </div>
 
-            <ReportTable
+                            <div className="erp-form-group">
+                                <label>Business Category</label>
+                                <input
+                                    type="text"
+                                    className="erp-input"
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    placeholder="Inventory / Finance"
+                                />
+                            </div>
 
-                reports={filteredReports}
+                            <div className="erp-form-group">
+                                <label>Compiled Author</label>
+                                <input
+                                    type="text"
+                                    className="erp-input"
+                                    value={formData.generatedBy}
+                                    onChange={(e) => setFormData({ ...formData, generatedBy: e.target.value })}
+                                    placeholder="Harsha Vardhan"
+                                />
+                            </div>
 
-                handleEdit={handleEdit}
+                            <div className="erp-form-group-full">
+                                <label>Compilation Status</label>
+                                <select
+                                    className="erp-input"
+                                    value={formData.status}
+                                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                >
+                                    <option value="Generated">Generated (Success)</option>
+                                    <option value="Pending">Pending Compile</option>
+                                </select>
+                            </div>
 
-                handleDelete={handleDelete}
-
-            />
-
-            <ReportModal
-
-                showModal={showModal}
-
-                setShowModal={setShowModal}
-
-                formData={formData}
-
-                setFormData={setFormData}
-
-                handleSave={handleSave}
-
-                editingId={editingId}
-
-            />
-
+                            <div className="modal-actions-row">
+                                <button type="button" className="erp-btn-secondary" onClick={() => setShowModal(false)}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className="erp-btn-primary" disabled={saving}>
+                                    {saving ? "Compiling..." : editingId ? "Save Report" : "Compile Report"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
-
     );
-
 }
 
 export default Reports;

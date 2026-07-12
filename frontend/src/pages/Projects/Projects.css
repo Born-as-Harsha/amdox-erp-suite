@@ -1,117 +1,359 @@
-.projects{
-    padding:30px;
+/* ======================================================
+   ENTERPRISE PROJECTS MODULE STYLING
+   ====================================================== */
+
+.projects-view-container {
+    padding: 30px;
+    background: #f8fafc;
+    min-height: calc(100vh - 140px);
 }
 
-.projects-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
+.projects-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
-.projects-header button{
-    background:#0d6efd;
-    color:white;
-    border:none;
-    padding:12px 20px;
-    border-radius:6px;
-    cursor:pointer;
+.projects-header-row h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
 }
 
-.search-box{
-    margin-bottom:25px;
+.projects-header-row p {
+    color: #64748b;
+    font-size: 15px;
 }
 
-.search-box input{
-    width:320px;
-    padding:12px;
-    border:1px solid #ccc;
-    border-radius:6px;
+/* Stats section cards */
+.projects-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
-.project-stats{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
-    margin-bottom:30px;
+.proj-stat-card h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
 }
 
-.stat-card{
-    background:white;
-    padding:25px;
-    border-radius:10px;
-    text-align:center;
-    box-shadow:0 2px 8px rgba(0,0,0,.1);
+.proj-stat-card h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 2px;
 }
 
-.stat-card h3{
-    color:#0d6efd;
+.proj-stat-card small {
+    font-size: 12px;
+    color: #94a3b8;
 }
 
-.stat-card p{
-    font-size:30px;
-    font-weight:bold;
+/* Project Cards Grid */
+.projects-grid-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
-.table-title{
-    margin-bottom:15px;
+.project-display-card {
+    display: flex;
+    flex-direction: column;
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
-    background:white;
-    border-radius:10px;
-    overflow:hidden;
+.project-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
-th{
-    background:#0d6efd;
-    color:white;
-    padding:14px;
+.project-id-tag {
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 6px;
 }
 
-td{
-    padding:14px;
-    border-bottom:1px solid #eee;
+.project-display-card h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
 }
 
-.status{
-    padding:6px 14px;
-    border-radius:20px;
-    font-weight:bold;
+.project-client-name {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 20px;
 }
 
-.completed{
-    background:#d1fae5;
-    color:#065f46;
+/* Progress bar */
+.project-progress-block {
+    margin-bottom: 20px;
 }
 
-.progress{
-    background:#dbeafe;
-    color:#1d4ed8;
+.progress-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
 }
 
-.pending{
-    background:#fee2e2;
-    color:#b91c1c;
+.progress-bar-track {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
 }
 
-.edit-btn{
-    background:#198754;
-    color:white;
-    border:none;
-    padding:6px 12px;
-    border-radius:5px;
-    margin-right:8px;
-    cursor:pointer;
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
 }
 
-.delete-btn{
-    background:#dc3545;
-    color:white;
-    border:none;
-    padding:6px 12px;
-    border-radius:5px;
-    cursor:pointer;
+.progress-bar-fill.planning {
+    background: #eab308;
+}
+
+.progress-bar-fill.in-progress {
+    background: #2563eb;
+}
+
+.progress-bar-fill.completed {
+    background: #16a34a;
+}
+
+/* Meta settings */
+.project-card-meta {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px dashed #e2e8f0;
+    padding-bottom: 15px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.meta-item svg {
+    color: #94a3b8;
+}
+
+/* Project card footer actions */
+.project-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.project-budget-val {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.project-budget-val svg {
+    color: #16a34a;
+}
+
+.project-card-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.edit-icon-btn,
+.delete-icon-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.edit-icon-btn {
+    color: #16a34a;
+}
+
+.edit-icon-btn:hover {
+    background: #f0fdf4;
+}
+
+.delete-icon-btn {
+    color: #ef4444;
+}
+
+.delete-icon-btn:hover {
+    background: #fef2f2;
+}
+
+/* Empty Project listing info */
+.no-projects-card {
+    grid-column: span 3;
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+/* Sorting button */
+.sort-direction-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sort-direction-btn:hover {
+    background: #e2e8f0;
+}
+
+/* Loading state */
+.projects-loading-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 140px);
+    gap: 16px;
+    color: #64748b;
+}
+
+.projects-loading-view svg {
+    font-size: 38px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Modals */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    padding: 20px;
+}
+
+.modal-form-card {
+    width: 100%;
+    max-width: 580px;
+    padding: 30px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-form-card h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 24px;
+}
+
+.modal-grid-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.modal-grid-form .erp-form-group {
+    grid-column: span 1;
+}
+
+.modal-grid-form .erp-form-group-full {
+    grid-column: span 2;
+}
+
+.modal-actions-row {
+    grid-column: span 2;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1200px) {
+    .projects-grid-layout {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .projects-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .projects-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .projects-grid-layout {
+        grid-template-columns: 1fr;
+    }
+    .no-projects-card {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 576px) {
+    .projects-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .projects-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .projects-header-row button {
+        width: 100%;
+        margin-top: 10px;
+    }
+    .modal-grid-form {
+        grid-template-columns: 1fr;
+    }
+    .modal-grid-form .erp-form-group {
+        grid-column: span 2;
+    }
 }

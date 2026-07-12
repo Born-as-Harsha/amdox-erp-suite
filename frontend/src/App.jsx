@@ -12,6 +12,7 @@ import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AppLayout from "./components/layout/AppLayout";
+import { SearchProvider } from "./context/SearchContext";
 
 function App() {
 
@@ -29,7 +30,9 @@ function App() {
                 <Route
                     element={
                         <ProtectedRoute>
-                            <AppLayout />
+                            <SearchProvider>
+                                <AppLayout />
+                            </SearchProvider>
                         </ProtectedRoute>
                     }
                 >

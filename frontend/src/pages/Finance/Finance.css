@@ -1,236 +1,255 @@
-.finance {
-    padding: 18px 20px;
-    background: #f8f9fc;
-    min-height: 100vh;
+/* ======================================================
+   ENTERPRISE FINANCE MODULE STYLING
+   ====================================================== */
+
+.finance-view-container {
+    padding: 30px;
+    background: #f8fafc;
+    min-height: calc(100vh - 140px);
 }
 
-.finance-header {
+.finance-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    gap: 12px;
+    margin-bottom: 30px;
+    gap: 20px;
     flex-wrap: wrap;
 }
 
-.finance-header h1 {
-    margin: 0;
+.finance-header-row h1 {
     font-size: 28px;
-    color: #212529;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
 }
 
-.finance-header button {
-    background: #0d6efd;
-    color: #ffffff;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-    font-weight: 600;
+.finance-header-row p {
+    color: #64748b;
+    font-size: 15px;
 }
 
-.finance-header button:hover {
-    background: #0b5ed7;
+.finance-actions-row {
+    display: flex;
+    gap: 12px;
 }
 
-.search-box {
-    margin-bottom: 25px;
-}
-
-.search-box input {
-    width: 100%;
-    max-width: 320px;
-    padding: 12px;
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    outline: none;
-    background: #ffffff;
-}
-
-.search-box input:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-}
-
-.finance-error {
-    color: #dc3545;
-    font-weight: 600;
-    margin-bottom: 16px;
-}
-
-.finance-stats {
+/* Metrics Cards Grid */
+.finance-metrics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
-    margin: 25px 0 30px;
+    margin-bottom: 30px;
 }
 
-.stat-card {
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 25px;
-    text-align: center;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-    transition: 0.3s;
-    border-top: 5px solid #0d6efd;
+.fin-metric-card h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
 }
 
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+.fin-metric-card h2 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 2px;
 }
 
-.stat-icon {
-    font-size: 36px;
-    margin-bottom: 12px;
+.fin-metric-card.income h2 {
+    color: #16a34a;
 }
 
-.stat-card h3 {
-    color: #666666;
-    margin-bottom: 12px;
+.fin-metric-card.expense h2 {
+    color: #ef4444;
+}
+
+.fin-metric-card small {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* Charts Grid */
+.finance-charts-row {
+    margin-bottom: 30px;
+}
+
+.finance-chart-card h3 {
     font-size: 18px;
-    font-weight: 600;
-}
-
-.stat-card p {
-    font-size: 34px;
-    color: #0d6efd;
     font-weight: 700;
-    margin: 0;
+    color: #0f172a;
+    margin-bottom: 4px;
 }
 
-.table-title {
-    margin-bottom: 15px;
-    color: #212529;
+.finance-chart-card p {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 20px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #ffffff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+/* Loading panel */
+.finance-loading-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 140px);
+    gap: 16px;
+    color: #64748b;
 }
 
-thead {
-    background: #0d6efd;
-    color: #ffffff;
+.finance-loading-view svg {
+    font-size: 38px;
+    animation: spin 1s linear infinite;
 }
 
-th {
-    padding: 18px;
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Sort & Icons */
+.sort-icon-muted {
+    opacity: 0.3;
+}
+
+table th svg {
+    margin-left: 6px;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+/* Actions Row Buttons */
+.edit-icon-btn,
+.delete-icon-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
     font-size: 16px;
-    text-align: center;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    margin-right: 6px;
 }
 
-td {
-    padding: 18px;
-    text-align: center;
-    border-bottom: 1px solid #ececec;
+.edit-icon-btn {
+    color: #16a34a;
 }
 
-tbody tr:hover {
-    background: #f5f9ff;
+.edit-icon-btn:hover {
+    background: #f0fdf4;
 }
 
-.status {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 20px;
+.delete-icon-btn {
+    color: #ef4444;
+}
+
+.delete-icon-btn:hover {
+    background: #fef2f2;
+}
+
+/* Modal form styling */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    padding: 20px;
+}
+
+.modal-form-card {
+    width: 100%;
+    max-width: 580px;
+    padding: 30px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-form-card h2 {
+    font-size: 20px;
     font-weight: 700;
-    font-size: 14px;
+    color: #0f172a;
+    margin-bottom: 24px;
 }
 
-.completed {
-    background: #d1fae5;
-    color: #065f46;
+.modal-grid-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
 }
 
-.received {
-    background: #dbeafe;
-    color: #1d4ed8;
+.modal-grid-form .erp-form-group {
+    grid-column: span 1;
 }
 
-.pending {
-    background: #fee2e2;
-    color: #b91c1c;
+.modal-grid-form .erp-form-group-full {
+    grid-column: span 2;
 }
 
-.edit-btn {
-    background: #198754;
-    color: #ffffff;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-right: 8px;
-    transition: 0.3s;
-    font-weight: 600;
+.modal-actions-row {
+    grid-column: span 2;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
 }
 
-.edit-btn:hover {
-    background: #157347;
+/* Browser Print settings */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .finance-view-container {
+        padding: 0 !important;
+        background: transparent !important;
+    }
+    .erp-table-container {
+        box-shadow: none !important;
+        border: none !important;
+    }
+    .erp-table th {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+    }
 }
 
-.delete-btn {
-    background: #dc3545;
-    color: #ffffff;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
-    font-weight: 600;
-}
-
-.delete-btn:hover {
-    background: #bb2d3b;
-}
-
-.finance-empty-state {
-    margin-top: 20px;
-    padding: 24px;
-    text-align: center;
-    background: #ffffff;
-    border-radius: 12px;
-    color: #6c757d;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+/* Responsive Overrides */
+@media (max-width: 992px) {
+    .finance-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
-    .finance {
-        padding: 16px;
+    .finance-metrics-grid {
+        grid-template-columns: 1fr;
     }
-
-    .finance-header {
+    .finance-header-row {
         flex-direction: column;
         align-items: flex-start;
     }
-
-    .finance-header button {
+    .finance-actions-row {
         width: 100%;
+        margin-top: 10px;
     }
-
-    .search-box input {
-        max-width: 100%;
+    .finance-actions-row button {
+        flex: 1;
     }
+}
 
-    .stat-card p {
-        font-size: 28px;
+@media (max-width: 576px) {
+    .modal-grid-form {
+        grid-template-columns: 1fr;
     }
-
-    th,
-    td {
-        padding: 12px 10px;
-        font-size: 14px;
-    }
-
-    .edit-btn,
-    .delete-btn {
-        padding: 8px 12px;
-        font-size: 14px;
-        margin-bottom: 6px;
+    .modal-grid-form .erp-form-group {
+        grid-column: span 2;
     }
 }

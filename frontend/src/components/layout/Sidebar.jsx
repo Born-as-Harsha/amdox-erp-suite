@@ -8,10 +8,12 @@ import {
     FaProjectDiagram,
     FaChartBar,
     FaCog,
-    FaSignOutAlt
+    FaSignOutAlt,
+    FaChevronLeft,
+    FaChevronRight
 } from "react-icons/fa";
 
-function Sidebar() {
+function Sidebar({ isCollapsed, toggleCollapse }) {
 
     const navigate = useNavigate();
 
@@ -56,7 +58,16 @@ function Sidebar() {
 
                 <div className="sidebar-header">
 
-                    <h2>ERP Menu</h2>
+                    {!isCollapsed && <h2>ERP Menu</h2>}
+
+                    <button
+                        type="button"
+                        className="collapse-toggle-btn"
+                        onClick={toggleCollapse}
+                        title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                    >
+                        {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
+                    </button>
 
                 </div>
 
