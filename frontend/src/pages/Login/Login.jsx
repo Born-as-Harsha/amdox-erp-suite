@@ -211,6 +211,10 @@ function Login() {
                     </button>
                 </form>
 
+                <p className="redirect-text" style={{ fontSize: "13px", color: "#64748b", textAlign: "center", marginTop: "15px" }}>
+                    Don't have an account? <span style={{ color: "#2563eb", fontWeight: "600", cursor: "pointer", textDecoration: "underline" }} onClick={() => navigate("/register")}>Register here</span>
+                </p>
+
                 <p className="footer-text">
                     © 2026 Amadox Technologies Pvt. Ltd.
                 </p>

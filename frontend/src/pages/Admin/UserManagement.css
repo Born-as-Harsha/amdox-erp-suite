@@ -1,0 +1,211 @@
+/* ======================================================
+   ENTERPRISE ADMIN USER MANAGEMENT MODULE STYLING
+   ====================================================== */
+
+.users-view-container {
+    padding: 30px;
+    background: #f8fafc;
+    min-height: calc(100vh - 140px);
+}
+
+.users-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.users-header-row h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.users-header-row p {
+    color: #64748b;
+    font-size: 15px;
+}
+
+.users-actions-row {
+    display: flex;
+    gap: 12px;
+}
+
+/* Metrics Cards Grid */
+.users-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.user-stat-card h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.user-stat-card h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 2px;
+}
+
+.user-stat-card small {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* Spinner Anim */
+.users-loading-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 140px);
+    gap: 16px;
+    color: #64748b;
+}
+
+.users-loading-view svg {
+    font-size: 38px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Sort Icons */
+.sort-icon-muted {
+    opacity: 0.3;
+}
+
+table th svg {
+    margin-left: 6px;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+/* Form Modals */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    padding: 20px;
+}
+
+.modal-form-card {
+    width: 100%;
+    max-width: 580px;
+    padding: 30px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-form-card h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 24px;
+}
+
+.modal-grid-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.modal-grid-form .erp-form-group {
+    grid-column: span 1;
+}
+
+.modal-grid-form .erp-form-group-full {
+    grid-column: span 2;
+}
+
+.modal-actions-row {
+    grid-column: span 2;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Actions Buttons in Table */
+.edit-icon-btn,
+.delete-icon-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    margin-right: 6px;
+}
+
+.edit-icon-btn {
+    color: #2563eb;
+}
+
+.edit-icon-btn:hover {
+    background: #eff6ff;
+}
+
+.delete-icon-btn {
+    color: #ef4444;
+}
+
+.delete-icon-btn:hover {
+    background: #fef2f2;
+}
+
+/* Responsive Grid Overrides */
+@media (max-width: 992px) {
+    .users-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .users-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .users-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .users-actions-row {
+        width: 100%;
+        margin-top: 10px;
+    }
+    .users-actions-row button {
+        flex: 1;
+    }
+}
+
+@media (max-width: 576px) {
+    .modal-grid-form {
+        grid-template-columns: 1fr;
+    }
+    .modal-grid-form .erp-form-group {
+        grid-column: span 2;
+    }
+}

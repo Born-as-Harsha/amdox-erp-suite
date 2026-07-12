@@ -82,6 +82,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {/* Super Admin & Admin Menus */}
                         {isAdmin && (
                             <>
+                                {role === "Super Admin" && renderLink("/users", <FaUsers />, "User Management")}
                                 {renderLink("/employees", <FaUsers />, "Employees")}
                                 {renderLink("/inventory", <FaBoxes />, "Inventory")}
                                 {renderLink("/finance", <FaMoneyBillWave />, "Finance")}
@@ -103,7 +104,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         )}
 
                         {/* Finance Menus */}
-                        {role === "Finance" && (
+                        {(role === "Finance Manager" || role === "Finance") && (
                             <>
                                 {renderLink("/finance", <FaMoneyBillWave />, "Finance")}
                                 {renderLink("/reports", <FaChartBar />, "Reports")}

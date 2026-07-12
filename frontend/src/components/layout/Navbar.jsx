@@ -86,7 +86,7 @@ function Navbar() {
 
                     {user.profilePicture ? (
                         <img
-                            src={user.profilePicture}
+                            src={user.profilePicture.startsWith("/uploads/") ? `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${user.profilePicture}` : user.profilePicture}
                             alt="Profile"
                             className="profile-avatar-nav"
                         />

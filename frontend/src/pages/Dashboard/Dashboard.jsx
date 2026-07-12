@@ -490,7 +490,14 @@ function Dashboard() {
 
     return (
         <div className="dashboard-container-view">
-            <div className="dashboard-header-block">
+            <div className="dashboard-header-block" style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                {user?.profilePicture && (
+                    <img
+                        src={user.profilePicture.startsWith("/uploads/") ? `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${user.profilePicture}` : user.profilePicture}
+                        alt="Profile avatar"
+                        style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover", border: "2px solid #2563eb" }}
+                    />
+                )}
                 <div>
                     <h1>Welcome, {user?.name || "Guest"}</h1>
                     <p>Logged in as: <strong>{role}</strong></p>
@@ -500,7 +507,7 @@ function Dashboard() {
             {/* Render Tailored Dashboard based on active role */}
             {role === "Super Admin" || role === "Admin" ? renderAdminDashboard() : null}
             {role === "HR" ? renderHRDashboard() : null}
-            {role === "Finance" ? renderFinanceDashboard() : null}
+            {(role === "Finance" || role === "Finance Manager") ? renderFinanceDashboard() : null}
             {role === "Inventory Manager" ? renderInventoryDashboard() : null}
             {role === "Project Manager" ? renderProjectDashboard() : null}
             {role === "Executive" ? renderExecutiveDashboard() : null}

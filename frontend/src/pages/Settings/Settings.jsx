@@ -13,10 +13,15 @@ import {
     FaEye,
     FaEyeSlash,
     FaGlobe,
-    FaBell
+    FaBell,
+    FaMapMarkerAlt,
+    FaHeartbeat,
+    FaCalendarAlt,
+    FaLanguage
 } from "react-icons/fa";
 import { getProfile, updateProfile } from "../../api/settingApi";
 import { convertImageToBase64 } from "../../utils/helpers";
+import { toast } from "react-toastify";
 
 function Settings() {
     const [formData, setFormData] = useState({
@@ -31,7 +36,13 @@ function Settings() {
         theme: "Light",
         profilePicture: "",
         newPassword: "",
-        confirmPassword: ""
+        confirmPassword: "",
+        // New Profile parameters
+        address: "",
+        emergencyContact: "",
+        dateOfBirth: "",
+        gender: "Male",
+        language: "English"
     });
 
     const [role, setRole] = useState("Employee");
@@ -59,12 +70,18 @@ function Settings() {
                 theme: data.theme || "Light",
                 profilePicture: data.profilePicture || "",
                 newPassword: "",
-                confirmPassword: ""
+                confirmPassword: "",
+                // New Profile parameters
+                address: data.address || "",
+                emergencyContact: data.emergencyContact || "",
+                dateOfBirth: data.dateOfBirth || "",
+                gender: data.gender || "Male",
+                language: data.language || "English"
             });
             setRole(data.role || "Employee");
         } catch (error) {
             console.error("Error fetching profile", error);
-            alert(error.response?.data?.message || "Failed to load profile settings.");
+            toast.error("Failed to load profile settings.");
         } finally {
             setLoading(false);
         }
@@ -81,7 +98,7 @@ function Settings() {
                 const base64 = await convertImageToBase64(file, { maxSizeMB: 2 });
                 setFormData((prev) => ({ ...prev, profilePicture: base64 }));
             } catch (error) {
-                alert(error.message || "Failed to convert image.");
+                toast.error(error.message || "Failed to convert image.");
             }
         }
     };
@@ -112,11 +129,11 @@ function Settings() {
 
         if (formData.newPassword) {
             if (formData.newPassword.length < 6) {
-                alert("New password must be at least 6 characters long.");
+                toast.error("New password must be at least 6 characters long.");
                 return;
             }
             if (formData.newPassword !== formData.confirmPassword) {
-                alert("New passwords do not match.");
+                toast.error("New passwords do not match.");
                 return;
             }
         }
@@ -134,7 +151,12 @@ function Settings() {
                 visibility: formData.visibility,
                 notificationsEnabled: formData.notificationsEnabled,
                 theme: formData.theme,
-                profilePicture: formData.profilePicture
+                profilePicture: formData.profilePicture,
+                address: formData.address,
+                emergencyContact: formData.emergencyContact,
+                dateOfBirth: formData.dateOfBirth,
+                gender: formData.gender,
+                language: formData.language
             };
 
             if (formData.newPassword) {
@@ -143,7 +165,7 @@ function Settings() {
 
             const response = await updateProfile(submitData);
 
-            // Sync with localStorage user key for header/sidebar updates
+            // Sync with localStorage/sessionStorage user key for header/sidebar updates
             const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
             if (storedUser) {
                 const user = JSON.parse(storedUser);
@@ -160,7 +182,7 @@ function Settings() {
                 }
             }
 
-            alert("Profile settings updated successfully!");
+            toast.success("Profile settings updated successfully!");
             
             // Clear passwords
             setFormData(prev => ({
@@ -174,7 +196,7 @@ function Settings() {
 
         } catch (error) {
             console.error("Error saving settings", error);
-            alert(error.response?.data?.message || "Failed to save profile settings.");
+            toast.error(error.response?.data?.message || "Failed to save profile settings.");
         } finally {
             setSaving(false);
         }
@@ -212,7 +234,7 @@ function Settings() {
                         <div className="avatar-wrapper" onClick={handleAvatarClick}>
                             {formData.profilePicture ? (
                                 <img
-                                    src={formData.profilePicture}
+                                    src={formData.profilePicture.startsWith("/uploads/") ? `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${formData.profilePicture}` : formData.profilePicture}
                                     alt="Profile Avatar"
                                     className="profile-avatar"
                                 />
@@ -295,7 +317,7 @@ function Settings() {
                             {activeTab === "profile" && (
                                 <div className="tab-pane">
                                     <h3>Personal Details</h3>
-                                    <p className="tab-desc">Update your personal contact details and public bio.</p>
+                                    <p className="tab-desc">Update your personal contact details, gender, DOB, emergency contacts and public bio.</p>
 
                                     <div className="form-grid">
                                         <div className="form-group-full">
@@ -341,6 +363,84 @@ function Settings() {
                                                         setFormData({ ...formData, phone: e.target.value })
                                                     }
                                                     placeholder="+91 98765 43210"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Added Fields */}
+                                        <div className="form-group-half">
+                                            <label>Date of Birth</label>
+                                            <div className="input-with-icon">
+                                                <FaCalendarAlt className="input-left-icon" />
+                                                <input
+                                                    type="date"
+                                                    value={formData.dateOfBirth}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, dateOfBirth: e.target.value })
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group-half">
+                                            <label>Gender</label>
+                                            <div className="input-with-icon">
+                                                <FaUser className="input-left-icon" />
+                                                <select
+                                                    value={formData.gender}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, gender: e.target.value })
+                                                    }
+                                                    style={{ width: "100%", padding: "10px 12px 10px 36px", border: "1px solid #cbd5e1", borderRadius: "8px", background: "#f8fafc", outline: "none" }}
+                                                >
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group-half">
+                                            <label>Language</label>
+                                            <div className="input-with-icon">
+                                                <FaLanguage className="input-left-icon" />
+                                                <input
+                                                    type="text"
+                                                    value={formData.language}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, language: e.target.value })
+                                                    }
+                                                    placeholder="English"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group-half">
+                                            <label>Emergency Contact</label>
+                                            <div className="input-with-icon">
+                                                <FaHeartbeat className="input-left-icon" />
+                                                <input
+                                                    type="text"
+                                                    value={formData.emergencyContact}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, emergencyContact: e.target.value })
+                                                    }
+                                                    placeholder="+91 99887 76655"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-group-full">
+                                            <label>Corporate Address</label>
+                                            <div className="input-with-icon">
+                                                <FaMapMarkerAlt className="input-left-icon" />
+                                                <input
+                                                    type="text"
+                                                    value={formData.address}
+                                                    onChange={(e) =>
+                                                        setFormData({ ...formData, address: e.target.value })
+                                                    }
+                                                    placeholder="Sector 62, Noida, UP, India"
                                                 />
                                             </div>
                                         </div>

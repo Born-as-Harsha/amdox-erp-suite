@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Employees from "./pages/Employees/Employees";
 import Payroll from "./pages/HR/Payroll";
@@ -14,6 +15,7 @@ import Tasks from "./pages/Projects/Tasks";
 import Analytics from "./pages/Executive/Analytics";
 import Reports from "./pages/Reports/Reports";
 import Settings from "./pages/Settings/Settings";
+import UserManagement from "./pages/Admin/UserManagement";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -21,7 +23,7 @@ import AppLayout from "./components/layout/AppLayout";
 import { SearchProvider } from "./context/SearchContext";
 
 function App() {
-    const allRoles = ["Super Admin", "Admin", "HR", "Finance", "Inventory Manager", "Project Manager", "Executive"];
+    const allRoles = ["Super Admin", "Admin", "HR", "Finance Manager", "Inventory Manager", "Project Manager", "Executive"];
 
     return (
         <BrowserRouter>
@@ -29,6 +31,11 @@ function App() {
                 <Route
                     path="/"
                     element={<Login />}
+                />
+                
+                <Route
+                    path="/register"
+                    element={<Register />}
                 />
 
                 <Route
@@ -102,7 +109,7 @@ function App() {
                     <Route
                         path="/finance"
                         element={
-                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Finance"]}>
+                            <RoleProtectedRoute allowedRoles={["Super Admin", "Admin", "Finance Manager", "Finance"]}>
                                 <Finance />
                             </RoleProtectedRoute>
                         }
@@ -149,6 +156,15 @@ function App() {
                         element={
                             <RoleProtectedRoute allowedRoles={allRoles}>
                                 <Settings />
+                            </RoleProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/users"
+                        element={
+                            <RoleProtectedRoute allowedRoles={["Super Admin"]}>
+                                <UserManagement />
                             </RoleProtectedRoute>
                         }
                     />
