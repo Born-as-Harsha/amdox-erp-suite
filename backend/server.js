@@ -9,9 +9,12 @@ import financeRoutes from "./routes/financeRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
+import seedDemoUsers from "./config/seed.js";
 dotenv.config();
 
-connectDB();
+connectDB().then(() => {
+    seedDemoUsers();
+});
 
 const app = express();
 
