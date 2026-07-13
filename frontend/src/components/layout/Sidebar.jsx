@@ -21,7 +21,8 @@ import {
     FaChartLine,
     FaHistory,
     FaUserTie,
-    FaBell
+    FaBell,
+    FaUser
 } from "react-icons/fa";
 
 function Sidebar({ isCollapsed, toggleCollapse }) {
