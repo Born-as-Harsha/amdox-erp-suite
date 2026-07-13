@@ -11,6 +11,11 @@ import { sendEmail } from "../utils/emailHelper.js";
 
 // Helper to send real Twilio SMS or print mock consoles
 const sendSmsOtp = async (phone, otpCode) => {
+    let formattedPhone = (phone || "").trim();
+    if (/^\d{10}$/.test(formattedPhone)) {
+        formattedPhone = `+91${formattedPhone}`;
+    }
+
     const accountSid = process.env.TWILIO_ACCOUNT_SID;
     const authToken = process.env.TWILIO_AUTH_TOKEN;
     const fromPhone = process.env.TWILIO_PHONE_NUMBER;
@@ -20,7 +25,7 @@ const sendSmsOtp = async (phone, otpCode) => {
             const authString = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
             const endpoint = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
             const params = new URLSearchParams();
-            params.append("To", phone);
+            params.append("To", formattedPhone);
             params.append("From", fromPhone);
             params.append("Body", `AMADOX ERP Secure MFA OTP: ${otpCode}. Valid for 5 minutes.`);
 
@@ -32,12 +37,12 @@ const sendSmsOtp = async (phone, otpCode) => {
                 },
                 body: params.toString()
             });
-            console.log(`[Twilio SMS] OTP successfully sent to ${phone}`);
+            console.log(`[Twilio SMS] OTP successfully sent to ${formattedPhone}`);
         } catch (err) {
             console.error("[Twilio SMS Error] Dispatch failed:", err.message);
         }
     } else {
-        console.log(`\n======================================\n[MOCK SMS DISPATCH]\nTO PHONE: ${phone}\nOTP CODE: ${otpCode}\n======================================\n`);
+        console.log(`\n======================================\n[MOCK SMS DISPATCH]\nTO PHONE: ${formattedPhone}\nOTP CODE: ${otpCode}\n======================================\n`);
     }
 };
 
