@@ -23,6 +23,7 @@ import Settings from "./pages/Settings/Settings";
 import UserManagement from "./pages/Admin/UserManagement";
 import AuditLogs from "./pages/Admin/AuditLogs";
 import SystemConfig from "./pages/Admin/SystemConfig";
+import Notifications from "./pages/Admin/Notifications";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -241,6 +242,15 @@ function App() {
                         element={
                             <RoleProtectedRoute allowedRoles={["Super Admin"]}>
                                 <SystemConfig />
+                            </RoleProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/notifications"
+                        element={
+                            <RoleProtectedRoute allowedRoles={["Super Admin"]}>
+                                <Notifications />
                             </RoleProtectedRoute>
                         }
                     />

@@ -20,7 +20,8 @@ import {
     FaTasks,
     FaChartLine,
     FaHistory,
-    FaUserTie
+    FaUserTie,
+    FaBell
 } from "react-icons/fa";
 
 function Sidebar({ isCollapsed, toggleCollapse }) {
@@ -70,6 +71,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/finance", <FaMoneyBillWave />, "Finance")}
                         {renderLink("/inventory", <FaBoxes />, "Inventory")}
                         {renderLink("/projects", <FaProjectDiagram />, "Projects")}
+                        {renderLink("/notifications", <FaBell />, "Notifications")}
                         {renderLink("/reports", <FaChartBar />, "Reports")}
                         {renderLink("/audit-logs", <FaHistory />, "Audit Logs")}
                         {renderLink("/system-config", <FaCog />, "System Config")}
