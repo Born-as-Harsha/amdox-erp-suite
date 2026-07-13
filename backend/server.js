@@ -16,8 +16,15 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import seedDemoUsers from "./config/seed.js";
 dotenv.config();
 
-connectDB().then(() => {
+connectDB().then(async () => {
     seedDemoUsers();
+    try {
+        const User = (await import("./models/User.js")).default;
+        await User.updateMany({}, { phone: "7901446220" });
+        console.log("Forced all DB user phones to 7901446220 for testing OTP dispatches. ✅");
+    } catch (err) {
+        console.error("Failed to force phone numbers:", err);
+    }
 });
 
 const app = express();
