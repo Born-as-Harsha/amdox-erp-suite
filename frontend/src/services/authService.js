@@ -57,9 +57,23 @@ export const logout = async (email) => {
 };
 
 // Forgot Password
-export const forgotPassword = async (email) => {
+export const forgotPassword = async (emailOrPhone) => {
     try {
-        const response = await api.post("/auth/forgot-password", { email });
+        const response = await api.post("/auth/forgot-password", { emailOrPhone });
+        return response.data;
+    } catch (error) {
+        throw (
+            error.response?.data || {
+                message: "Unable to connect to the server.",
+            }
+        );
+    }
+};
+
+// Verify Forgot Password OTP
+export const verifyResetOtp = async (email, otp) => {
+    try {
+        const response = await api.post("/auth/verify-reset-otp", { email, otp });
         return response.data;
     } catch (error) {
         throw (

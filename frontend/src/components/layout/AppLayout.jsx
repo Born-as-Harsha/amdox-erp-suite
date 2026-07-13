@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
+import CommandPalette from "./CommandPalette";
 
 function AppLayout({ children }) {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -19,6 +20,7 @@ function AppLayout({ children }) {
 
     return (
         <div className="erp-wrapper">
+            <CommandPalette />
 
             {/* Top Navigation */}
             <Navbar />

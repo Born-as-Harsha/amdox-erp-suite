@@ -1,32 +1,79 @@
 import "./ForgotPassword.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { forgotPassword } from "../../services/authService";
+import { forgotPassword, verifyResetOtp } from "../../services/authService";
 import { toast } from "react-toastify";
 import { FaEnvelope, FaSpinner, FaArrowLeft, FaKey } from "react-icons/fa";
 
 function ForgotPassword() {
     const navigate = useNavigate();
-    const [email, setEmail] = useState("");
+    const [emailOrPhone, setEmailOrPhone] = useState("");
+    const [otpCode, setOtpCode] = useState("");
+    const [otpRequired, setOtpRequired] = useState(false);
+    const [verifiedEmail, setVerifiedEmail] = useState("");
+    const [otpTimer, setOtpTimer] = useState(30);
+    const [resendDisabled, setResendDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
-    const [recoveryToken, setRecoveryToken] = useState("");
 
-    const handleSubmit = async (e) => {
+    useEffect(() => {
+        let timer;
+        if (otpRequired && otpTimer > 0) {
+            timer = setTimeout(() => setOtpTimer(otpTimer - 1), 1000);
+        } else if (otpRequired && otpTimer === 0) {
+            setResendDisabled(false);
+        }
+        return () => clearTimeout(timer);
+    }, [otpRequired, otpTimer]);
+
+    const handleSendOtp = async (e) => {
         e.preventDefault();
-        if (!email.trim()) {
-            toast.error("Please enter your registered email address.");
+        if (!emailOrPhone.trim()) {
+            toast.error("Email or Phone Number is required.");
             return;
         }
 
         setLoading(true);
         try {
-            const data = await forgotPassword(email);
-            toast.success("Recovery token generated!");
-            setRecoveryToken(data.token);
+            const data = await forgotPassword(emailOrPhone);
+            toast.success("MFA password recovery code sent successfully.");
+            setVerifiedEmail(data.email);
+            setOtpRequired(true);
+            setOtpTimer(30);
+            setResendDisabled(true);
         } catch (error) {
             toast.error(error?.message || "Failed to process recovery request.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async (e) => {
+        e.preventDefault();
+        if (!otpCode || otpCode.length !== 6) {
+            toast.error("Please enter the 6-digit verification code.");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const data = await verifyResetOtp(verifiedEmail, otpCode);
+            toast.success("Code verified successfully!");
+            navigate(`/reset-password/${data.token}`);
+        } catch (error) {
+            toast.error(error?.message || "Invalid or expired verification code.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendOtp = async () => {
+        try {
+            await forgotPassword(verifiedEmail);
+            setOtpTimer(30);
+            setResendDisabled(true);
+            toast.success("A new verification code has been dispatched.");
+        } catch (err) {
+            toast.error("Failed to resend verification code.");
         }
     };
 
@@ -39,20 +86,23 @@ function ForgotPassword() {
 
                 <h2>Recover Password</h2>
                 <p className="forgot-description">
-                    Enter your enterprise email address below. The system will generate a temporary secure recovery token to reset your password.
+                    {otpRequired 
+                        ? `We have dispatched a 6-digit password recovery code to your phone and email. Enter it below to proceed.`
+                        : `Enter your enterprise email address or registered mobile number below to retrieve a secure verification code.`
+                    }
                 </p>
 
-                {!recoveryToken ? (
-                    <form onSubmit={handleSubmit} noValidate>
+                {!otpRequired ? (
+                    <form onSubmit={handleSendOtp} noValidate>
                         <div className="form-group">
-                            <label>Email Address</label>
+                            <label>Email Address or Mobile Number</label>
                             <div className="input-box">
                                 <FaEnvelope className="input-icon" />
                                 <input
-                                    type="email"
-                                    placeholder="enter your email address"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    type="text"
+                                    placeholder="Enter your registered email or phone"
+                                    value={emailOrPhone}
+                                    onChange={(e) => setEmailOrPhone(e.target.value)}
                                 />
                             </div>
                         </div>
@@ -60,39 +110,62 @@ function ForgotPassword() {
                         <button type="submit" className="recovery-btn" disabled={loading}>
                             {loading ? (
                                 <>
-                                    <FaSpinner className="spinner" /> Generating Token...
+                                    <FaSpinner className="spinner" /> Generating Code...
                                 </>
                             ) : (
-                                "Generate Recovery Token"
+                                "Send Recovery Code"
                             )}
                         </button>
                     </form>
                 ) : (
-                    <div className="recovery-success-box">
-                        <div className="success-icon-wrapper">
-                            <FaKey />
+                    <form onSubmit={handleVerifyOtp} noValidate>
+                        <div className="form-group" style={{ marginBottom: "20px" }}>
+                            <label style={{ textAlign: "left", display: "block", marginBottom: "6px" }}>Verification Code</label>
+                            <div className="input-box">
+                                <FaKey className="input-icon" />
+                                <input
+                                    type="text"
+                                    maxLength="6"
+                                    required
+                                    placeholder="6-Digit OTP"
+                                    value={otpCode}
+                                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                                    style={{ letterSpacing: "4px", textAlign: "center", fontSize: "18px", fontWeight: "700" }}
+                                />
+                            </div>
                         </div>
-                        <h3>Recovery Token Generated</h3>
-                        <p className="token-help">
-                            Copy this token and proceed to the reset screen:
-                        </p>
-                        <div className="token-display-box">
-                            <code>{recoveryToken}</code>
-                        </div>
-                        <button
-                            type="button"
-                            className="proceed-reset-btn"
-                            onClick={() => navigate(`/reset-password/${recoveryToken}`)}
-                        >
-                            Proceed to Reset Password
+
+                        <button type="submit" className="recovery-btn" disabled={loading}>
+                            {loading ? (
+                                <>
+                                    <FaSpinner className="spinner" /> Verifying Code...
+                                </>
+                            ) : (
+                                "Verify & Proceed"
+                            )}
                         </button>
-                    </div>
+
+                        <div style={{ marginTop: "20px", fontSize: "13px", color: "#64748b", textAlign: "center" }}>
+                            {resendDisabled ? (
+                                <span>Resend OTP in <b>{otpTimer}s</b></span>
+                            ) : (
+                                <button 
+                                    type="button" 
+                                    onClick={handleResendOtp}
+                                    style={{ background: "none", border: "none", color: "#2563eb", fontWeight: "600", cursor: "pointer", outline: "none" }}
+                                >
+                                    Resend Code
+                                </button>
+                            )}
+                        </div>
+                    </form>
                 )}
 
                 <button
                     type="button"
                     className="back-login-btn"
                     onClick={() => navigate("/")}
+                    style={{ marginTop: "15px" }}
                 >
                     <FaArrowLeft /> Back to Login
                 </button>

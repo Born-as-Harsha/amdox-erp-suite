@@ -2,9 +2,44 @@ import User from "../models/User.js";
 import Role from "../models/Role.js";
 import UserSession from "../models/UserSession.js";
 import AuditLog from "../models/AuditLog.js";
+import OTP from "../models/OTP.js";
+import SystemConfig from "../models/SystemConfig.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 import { saveBase64Image } from "../utils/imageHelper.js";
+import { sendEmail } from "../utils/emailHelper.js";
+
+// Helper to send real Twilio SMS or print mock consoles
+const sendSmsOtp = async (phone, otpCode) => {
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const fromPhone = process.env.TWILIO_PHONE_NUMBER;
+
+    if (accountSid && authToken && fromPhone) {
+        try {
+            const authString = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
+            const endpoint = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+            const params = new URLSearchParams();
+            params.append("To", phone);
+            params.append("From", fromPhone);
+            params.append("Body", `AMADOX ERP Secure MFA OTP: ${otpCode}. Valid for 5 minutes.`);
+
+            await fetch(endpoint, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Basic ${authString}`,
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: params.toString()
+            });
+            console.log(`[Twilio SMS] OTP successfully sent to ${phone}`);
+        } catch (err) {
+            console.error("[Twilio SMS Error] Dispatch failed:", err.message);
+        }
+    } else {
+        console.log(`\n======================================\n[MOCK SMS DISPATCH]\nTO PHONE: ${phone}\nOTP CODE: ${otpCode}\n======================================\n`);
+    }
+};
 
 // =====================================
 // REGISTER USER
@@ -63,9 +98,9 @@ export const registerUser = async (req, res) => {
             emergencyContact: emergencyContact || "",
             language: language || "English",
             bio: bio || "",
-            status: "Active",
-            emailVerified: true,
-            otpVerified: true
+            status: "Pending Verification", // Temporarily stage user
+            emailVerified: false,
+            otpVerified: false
         });
 
         // Save profile picture to uploads/profile
@@ -78,22 +113,45 @@ export const registerUser = async (req, res) => {
 
         await user.save();
 
+        // Generate 6 digit OTP and hash it
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const hashedOtp = await bcrypt.hash(otpCode, 10);
+        
+        await OTP.findOneAndUpdate(
+            { email: user.email },
+            { 
+                otpCode: hashedOtp, 
+                expiresAt: new Date(Date.now() + 5 * 60 * 1000), 
+                attempts: 0, 
+                lastResendTime: new Date() 
+            },
+            { upsert: true, new: true }
+        );
+
+        // Send real or mock SMS OTP
+        await sendSmsOtp(user.phone || "7901446220", otpCode);
+
+        // Send Nodemailer welcome verification email
+        await sendEmail({
+            to: user.email,
+            subject: "Welcome to AMADOX ERP Suite - Verification Code",
+            text: `Welcome, ${user.name}! Your OTP verification code is ${otpCode}. It expires in 5 minutes.`,
+            html: `<h3>Welcome, ${user.name}!</h3><p>Your OTP verification code is: <b>${otpCode}</b>.</p><p>It will expire in 5 minutes.</p>`
+        });
+
         // Write Audit Log
         await AuditLog.create({
             userId: user._id,
-            action: "User Registration",
-            details: `User ${user.email} registered.`,
+            action: "User Registration Started",
+            details: `User ${user.email} registration started, OTP dispatched.`,
             ipAddress: req.ip || ""
         });
 
         res.status(201).json({
-            _id: user._id,
-            name: user.name,
+            otpRequired: true,
             email: user.email,
-            role: user.role,
-            employeeId: user.employeeId,
-            profilePicture: user.profilePicture,
-            token: generateToken(user._id)
+            phone: user.phone || "7901446220",
+            message: "MFA Code sent successfully. Please verify to activate account."
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -101,23 +159,24 @@ export const registerUser = async (req, res) => {
 };
 
 // =====================================
-// LOGIN USER (Email OR Username)
+// LOGIN USER (Email, Username, Employee ID, Phone)
 // =====================================
 export const loginUser = async (req, res) => {
     try {
         const { emailOrUsername, password, rememberMe } = req.body;
 
-        // Find user by email OR username OR phone
+        // Find user by email OR username OR phone OR employeeId
         const user = await User.findOne({
             $or: [
                 { email: emailOrUsername },
                 { username: emailOrUsername },
+                { employeeId: emailOrUsername },
                 { phone: emailOrUsername }
             ]
         });
 
         if (!user) {
-            return res.status(401).json({ message: "Invalid email/username/mobile or password." });
+            return res.status(401).json({ message: "Invalid credentials." });
         }
 
         if (user.status === "Inactive") {
@@ -126,23 +185,38 @@ export const loginUser = async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ message: "Invalid email/username/mobile or password." });
+            return res.status(401).json({ message: "Invalid credentials." });
         }
 
-        // Determine OTP Requirement Level
-        const level1Roles = ["Employee", "Viewer"];
-        const needsOtp = !level1Roles.includes(user.role);
+        // Check if global settings toggle otpActive
+        const config = await SystemConfig.findOne();
+        const globalOtpActive = config ? config.otpActive : true;
+
+        // MFA roles check: Super Admin, Admin, HR Manager, Finance Manager, Project Manager
+        const mfaRoles = ["Super Admin", "Admin", "HR Manager", "Finance Manager", "Project Manager"];
+        const needsOtp = globalOtpActive && (mfaRoles.includes(user.role) || user.status === "Pending Verification");
 
         if (needsOtp) {
             // Generate 6 digit OTP
             const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-            user.otpCode = otpCode;
-            user.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes validation
-            user.otpVerified = false;
-            await user.save();
+            const hashedOtp = await bcrypt.hash(otpCode, 10);
 
-            // Print OTP to Node Console for simulated email/SMS dispatch
-            console.log(`\n======================================\n[SIMULATED SMS & EMAIL DISPATCH]\nTO: ${user.email}\nSMS PHONE: ${user.phone || "7901446220"}\nSUBJECT: AMADOX ERP OTP VERIFICATION CODE\nOTP CODE: ${otpCode}\n======================================\n`);
+            await OTP.findOneAndUpdate(
+                { email: user.email },
+                { 
+                    otpCode: hashedOtp, 
+                    expiresAt: new Date(Date.now() + 5 * 60 * 1000), 
+                    attempts: 0, 
+                    lastResendTime: new Date() 
+                },
+                { upsert: true, new: true }
+            );
+
+            // Send Twilio SMS and email
+            await sendSmsOtp(user.phone || "7901446220", otpCode);
+
+            // Print OTP to Node Console for backup verification
+            console.log(`\n======================================\n[MOCK SMS & EMAIL DISPATCH]\nTO: ${user.email}\nSMS PHONE: ${user.phone || "7901446220"}\nSUBJECT: AMADOX ERP OTP VERIFICATION CODE\nOTP CODE: ${otpCode}\n======================================\n`);
 
             return res.status(200).json({
                 otpRequired: true,
@@ -151,9 +225,10 @@ export const loginUser = async (req, res) => {
             });
         }
 
-        // Direct Login for Level 1
+        // Direct Login for Non-MFA roles
         user.lastLogin = new Date();
         user.otpVerified = true;
+        user.status = "Active"; // Safe fallback
         
         const accessToken = generateToken(user._id);
         const refreshToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -217,14 +292,30 @@ export const verifyOtp = async (req, res) => {
             return res.status(404).json({ message: "User not found." });
         }
 
-        if (!user.otpCode || user.otpCode !== otp || user.otpExpires < Date.now()) {
-            return res.status(400).json({ message: "Invalid or expired OTP code." });
+        const otpRecord = await OTP.findOne({ email });
+        if (!otpRecord) {
+            return res.status(400).json({ message: "No active verification request found or OTP has expired." });
         }
 
-        // OTP Verified, clear code
+        if (otpRecord.attempts >= 5) {
+            return res.status(400).json({ message: "Too many incorrect verification attempts. Please request a new OTP." });
+        }
+
+        const isMatch = await bcrypt.compare(otp, otpRecord.otpCode);
+        if (!isMatch) {
+            otpRecord.attempts += 1;
+            await otpRecord.save();
+            return res.status(400).json({ message: `Incorrect verification code. Attempts remaining: ${5 - otpRecord.attempts}` });
+        }
+
+        // OTP Verified, delete DB record
+        await OTP.deleteOne({ email });
+
         user.otpCode = "";
         user.otpExpires = undefined;
         user.otpVerified = true;
+        user.status = "Active"; // Activate the user account
+        user.emailVerified = true;
         user.lastLogin = new Date();
 
         const accessToken = generateToken(user._id);
@@ -254,7 +345,7 @@ export const verifyOtp = async (req, res) => {
         await AuditLog.create({
             userId: user._id,
             action: "OTP Login Verified",
-            details: `OTP Verified for user ${user.email}.`,
+            details: `OTP Verified for user ${user.email}, account activated/logged in.`,
             ipAddress: req.ip || ""
         });
 
@@ -314,30 +405,106 @@ export const logoutUser = async (req, res) => {
 // =====================================
 export const forgotPassword = async (req, res) => {
     try {
-        const { email } = req.body;
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return res.status(404).json({ message: "No account found with this email." });
+        const { emailOrPhone } = req.body;
+        if (!emailOrPhone) {
+            return res.status(400).json({ message: "Email or Phone Number is required." });
         }
 
-        // Generate simple token string
-        const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expiration
-        await user.save();
+        const user = await User.findOne({
+            $or: [
+                { email: emailOrPhone.toLowerCase() },
+                { phone: emailOrPhone }
+            ]
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "No account found with this email or phone number." });
+        }
+
+        // Generate 6 digit OTP and hash it
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const hashedOtp = await bcrypt.hash(otpCode, 10);
+
+        await OTP.findOneAndUpdate(
+            { email: user.email },
+            { 
+                otpCode: hashedOtp, 
+                expiresAt: new Date(Date.now() + 5 * 60 * 1000), 
+                attempts: 0, 
+                lastResendTime: new Date() 
+            },
+            { upsert: true, new: true }
+        );
+
+        // Send OTP SMS and Email
+        await sendSmsOtp(user.phone || "7901446220", otpCode);
+        
+        await sendEmail({
+            to: user.email,
+            subject: "AMADOX ERP - Password Recovery Code",
+            text: `Your OTP verification code to reset your password is: ${otpCode}. It expires in 5 minutes.`,
+            html: `<h3>Password Recovery Request</h3><p>Your OTP verification code is: <b>${otpCode}</b>.</p><p>It will expire in 5 minutes.</p>`
+        });
 
         // Write Audit Log
         await AuditLog.create({
             userId: user._id,
             action: "Forgot Password Request",
-            details: `Recovery request registered for ${user.email}.`,
+            details: `Recovery request registered for ${user.email}, OTP dispatched.`,
             ipAddress: req.ip || ""
         });
 
-        // Return token directly in the API response payload
         res.status(200).json({
-            message: "Password reset token generated successfully.",
+            message: "OTP Code sent successfully. Please check your phone/email to verify.",
+            email: user.email
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// =====================================
+// VERIFY FORGOT PASSWORD OTP
+// =====================================
+export const verifyResetOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        if (!email || !otp) {
+            return res.status(400).json({ message: "Email and OTP code are required." });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const otpRecord = await OTP.findOne({ email });
+        if (!otpRecord) {
+            return res.status(400).json({ message: "No active password recovery request found or OTP has expired." });
+        }
+
+        if (otpRecord.attempts >= 5) {
+            return res.status(400).json({ message: "Too many incorrect verification attempts. Please request a new OTP." });
+        }
+
+        const isMatch = await bcrypt.compare(otp, otpRecord.otpCode);
+        if (!isMatch) {
+            otpRecord.attempts += 1;
+            await otpRecord.save();
+            return res.status(400).json({ message: `Incorrect verification code. Attempts remaining: ${5 - otpRecord.attempts}` });
+        }
+
+        // OTP verified, delete record
+        await OTP.deleteOne({ email });
+
+        // Generate transient password reset token (1 hour)
+        const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000;
+        await user.save();
+
+        res.status(200).json({
+            message: "OTP Verified successfully.",
             token
         });
     } catch (error) {

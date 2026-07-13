@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import Role from "../models/Role.js";
 import bcrypt from "bcryptjs";
 import AuditLog from "../models/AuditLog.js";
+import SystemConfig from "../models/SystemConfig.js";
 
 // Get All Users
 export const getUsers = async (req, res) => {
@@ -174,6 +175,41 @@ export const getAuditLogs = async (req, res) => {
             .populate("userId", "email")
             .sort({ createdAt: -1 });
         res.status(200).json(logs);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Get System Config (Super Admin only)
+export const getSystemConfig = async (req, res) => {
+    try {
+        let config = await SystemConfig.findOne();
+        if (!config) {
+            config = await SystemConfig.create({});
+        }
+        res.status(200).json(config);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Update System Config (Super Admin only)
+export const updateSystemConfig = async (req, res) => {
+    try {
+        const { otpActive, captchaActive, sessionTimeout, passwordComplexity, apiRateLimit } = req.body;
+        let config = await SystemConfig.findOne();
+        if (!config) {
+            config = new SystemConfig();
+        }
+
+        if (otpActive !== undefined) config.otpActive = otpActive;
+        if (captchaActive !== undefined) config.captchaActive = captchaActive;
+        if (sessionTimeout !== undefined) config.sessionTimeout = sessionTimeout;
+        if (passwordComplexity !== undefined) config.passwordComplexity = passwordComplexity;
+        if (apiRateLimit !== undefined) config.apiRateLimit = apiRateLimit;
+
+        await config.save();
+        res.status(200).json(config);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

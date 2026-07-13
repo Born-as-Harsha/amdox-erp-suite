@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaCog, FaLock, FaKey, FaShieldAlt } from "react-icons/fa";
 import { toast } from "react-toastify";
+import api from "../../services/api";
 
 function SystemConfig() {
     const [config, setConfig] = useState({
@@ -12,13 +13,31 @@ function SystemConfig() {
     });
     const [saving, setSaving] = useState(false);
 
-    const handleSubmit = (e) => {
+    useEffect(() => {
+        const loadConfig = async () => {
+            try {
+                const res = await api.get("/users/config");
+                if (res.data) {
+                    setConfig(res.data);
+                }
+            } catch (err) {
+                console.error("Failed to retrieve config:", err);
+            }
+        };
+        loadConfig();
+    }, []);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
-        setTimeout(() => {
-            setSaving(false);
+        try {
+            await api.put("/users/config", config);
             toast.success("Enterprise System Configurations updated successfully!");
-        }, 800);
+        } catch (err) {
+            toast.error("Failed to update global settings.");
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (

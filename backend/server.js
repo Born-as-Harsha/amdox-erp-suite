@@ -10,6 +10,9 @@ import projectRoutes from "./routes/projectRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import searchRoutes from "./routes/searchRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import seedDemoUsers from "./config/seed.js";
 dotenv.config();
 
@@ -32,6 +35,9 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/search", searchRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 
 const PORT = process.env.PORT || 5000;
