@@ -1,7 +1,7 @@
 import "./UserManagement.css";
 import { useEffect, useMemo, useState } from "react";
 import { getUsers, createUser, updateUser, deleteUser, resetUserPassword } from "../../services/authService";
-import { FaPlus, FaTrash, FaEdit, FaKey, FaUserCheck, FaUserMinus, FaDownload, FaSpinner, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import { FaPlus, FaTrash, FaEdit, FaKey, FaUserCheck, FaUserMinus, FaDownload, FaSpinner, FaSort, FaSortUp, FaSortDown, FaFilePdf } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 function UserManagement() {
@@ -175,6 +175,76 @@ function UserManagement() {
         document.body.removeChild(link);
     };
 
+    const exportUsersPDF = () => {
+        const printWindow = window.open("", "_blank");
+        if (!printWindow) {
+            toast.error("Popup blocked. Please allow popups to export PDF.");
+            return;
+        }
+
+        const htmlContent = `
+            <html>
+                <head>
+                    <title>AMADOX ERP - Corporate User Directory</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b; padding: 30px; }
+                        .header { border-bottom: 2px solid #3b82f6; padding-bottom: 15px; margin-bottom: 20px; }
+                        h1 { color: #0f172a; margin: 0 0 5px 0; font-size: 24px; font-weight: 700; }
+                        p { color: #64748b; font-size: 14px; margin: 0; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                        th, td { border: 1px solid #cbd5e1; padding: 10px 12px; text-align: left; font-size: 12px; }
+                        th { background: #f8fafc; font-weight: 700; color: #475569; }
+                        tr:nth-child(even) { background: #f8fafc; }
+                        .badge { background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; border: 1px solid #bbf7d0; }
+                        .badge.inactive { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+                        .footer { margin-top: 30px; font-size: 11px; color: #94a3b8; text-align: center; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>AMADOX ERP - User Directory</h1>
+                        <p>Generated on: ${new Date().toLocaleDateString()} | Total Members: ${filteredUsers.length}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Emp ID</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Department</th>
+                                <th>Designation</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredUsers.map(u => `
+                                <tr>
+                                    <td><code>${u.employeeId || "N/A"}</code></td>
+                                    <td><b>${u.name}</b></td>
+                                    <td>${u.email}</td>
+                                    <td>${u.role}</td>
+                                    <td>${u.department || "N/A"}</td>
+                                    <td>${u.designation || "N/A"}</td>
+                                    <td><span class="badge ${u.status === "Active" ? "" : "inactive"}">${u.status}</span></td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                    <div class="footer">
+                        © 2026 Amadox Technologies Pvt. Ltd. Confidential.
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); window.close(); }
+                    </script>
+                </body>
+            </html>
+        `;
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        toast.success("User directory PDF preview generated.");
+    };
+
     // Table Header Sorting trigger
     const triggerSort = (column) => {
         if (sortBy === column) {
@@ -273,6 +343,9 @@ function UserManagement() {
                 <div className="users-actions-row">
                     <button type="button" className="erp-btn-secondary" onClick={exportUsersCSV}>
                         <FaDownload /> Export CSV
+                    </button>
+                    <button type="button" className="erp-btn-secondary" onClick={exportUsersPDF} style={{ background: "#dc2626", color: "#ffffff", borderColor: "#dc2626" }}>
+                        <FaFilePdf /> Export PDF
                     </button>
                     <button type="button" className="erp-btn-primary" onClick={openAddModal}>
                         <FaPlus /> Create User

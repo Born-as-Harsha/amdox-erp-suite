@@ -76,6 +76,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/audit-logs", <FaHistory />, "Audit Logs")}
                         {renderLink("/system-config", <FaCog />, "System Config")}
                         {renderLink("/analytics", <FaChartLine />, "Analytics")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -88,6 +89,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/inventory", <FaBoxes />, "Inventory")}
                         {renderLink("/projects", <FaProjectDiagram />, "Projects")}
                         {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -101,6 +103,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/recruitment", <FaUserTie />, "Recruitment")}
                         {renderLink("/payroll", <FaFileInvoiceDollar />, "Payroll")}
                         {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -112,6 +115,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/attendance", <FaUserClock />, "Attendance")}
                         {renderLink("/leave", <FaCalendarTimes />, "Leave")}
                         {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -123,6 +127,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/invoices", <FaFileInvoiceDollar />, "Invoices")}
                         {renderLink("/payroll", <FaFileInvoiceDollar />, "Payroll")}
                         {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -132,6 +137,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
                         {renderLink("/invoices", <FaFileInvoiceDollar />, "Invoices")}
                         {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -142,6 +148,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/inventory", <FaBoxes />, "Inventory")}
                         {renderLink("/suppliers", <FaTruck />, "Suppliers")}
                         {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -150,6 +157,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                     <>
                         {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
                         {renderLink("/inventory", <FaBoxes />, "Inventory")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -160,6 +168,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/projects", <FaProjectDiagram />, "Projects")}
                         {renderLink("/teams", <FaUsers />, "Teams")}
                         {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -169,6 +178,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
                         {renderLink("/projects", <FaProjectDiagram />, "Projects")}
                         {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -179,6 +189,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/tasks", <FaTasks />, "My Tasks")}
                         {renderLink("/leave", <FaCalendarTimes />, "Leave")}
                         {renderLink("/attendance", <FaUserClock />, "Attendance")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -188,6 +199,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                         {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
                         {renderLink("/analytics", <FaChartLine />, "Analytics")}
                         {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -196,6 +208,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                     <>
                         {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
                         {renderLink("/reports", <FaChartBar />, "Reports")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );
@@ -203,6 +216,7 @@ function Sidebar({ isCollapsed, toggleCollapse }) {
                 return (
                     <>
                         {renderLink("/dashboard", <FaTachometerAlt />, "Dashboard")}
+                        {renderLink("/profile", <FaUser />, "Profile")}
                         {renderLink("/settings", <FaCog />, "Settings")}
                     </>
                 );

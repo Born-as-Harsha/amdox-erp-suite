@@ -210,8 +210,8 @@ function Settings() {
         <div className="settings-container">
             <div className="settings-header">
                 <div>
-                    <h1>Enterprise Settings</h1>
-                    <p>Manage your account settings, personal details, system preferences, and security options.</p>
+                    <h1>Corporate Profile Console</h1>
+                    <p>Manage your digital identity, personal details, and verify corporate credentials.</p>
                 </div>
             </div>
 
@@ -303,6 +303,13 @@ function Settings() {
                             onClick={() => setActiveTab("preferences")}
                         >
                             <FaPalette /> Preferences
+                        </button>
+                        <button
+                            type="button"
+                            className={`tab-btn ${activeTab === "badge" ? "active" : ""}`}
+                            onClick={() => setActiveTab("badge")}
+                        >
+                            <FaKey /> Digital ID Card
                         </button>
                     </div>
 
@@ -714,6 +721,99 @@ function Settings() {
                                                 </select>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === "badge" && (
+                                <div className="tab-pane">
+                                    <h3>Corporate Employee ID Badge</h3>
+                                    <p className="tab-desc">Generate, print and verify your official AMADOX digital identity card with a secure QR verification mark.</p>
+                                    
+                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "20px", marginTop: "20px" }}>
+                                        {/* Physical ID Card simulation */}
+                                        <div 
+                                            id="corporate-id-badge"
+                                            style={{
+                                                width: "320px",
+                                                background: "linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%)",
+                                                borderRadius: "16px",
+                                                padding: "24px",
+                                                color: "#ffffff",
+                                                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
+                                                border: "2px solid rgba(255, 255, 255, 0.1)",
+                                                position: "relative",
+                                                fontFamily: "'Inter', sans-serif",
+                                                textAlign: "center"
+                                            }}
+                                        >
+                                            {/* Header */}
+                                            <div style={{ fontSize: "16px", fontWeight: "800", letterSpacing: "2px", color: "#f59e0b", marginBottom: "4px" }}>AMADOX TECHNOLOGIES</div>
+                                            <div style={{ fontSize: "9px", letterSpacing: "1px", textTransform: "uppercase", color: "#94a3b8", marginBottom: "15px", borderBottom: "1px solid rgba(255,255,255,0.15)", paddingBottom: "8px" }}>Enterprise Identity Badge</div>
+
+                                            {/* Photo */}
+                                            <div style={{ position: "relative", width: "100px", height: "100px", margin: "0 auto 15px auto" }}>
+                                                <img 
+                                                    src={formData.profilePicture ? getAvatarUrl(formData.profilePicture) : "https://via.placeholder.com/100"} 
+                                                    alt="Badge Avatar"
+                                                    style={{ width: "100%", height: "100%", borderRadius: "50%", border: "3px solid #f59e0b", objectFit: "cover", background: "#334155" }}
+                                                />
+                                            </div>
+
+                                            {/* Info */}
+                                            <h4 style={{ margin: "0 0 4px 0", fontSize: "18px", color: "#ffffff", fontWeight: "700" }}>{formData.name || "Rahul Sharma"}</h4>
+                                            <p style={{ margin: "0 0 15px 0", fontSize: "12px", color: "#38bdf8", fontWeight: "600" }}>{formData.designation || "Senior Architect"}</p>
+
+                                            <div style={{ background: "rgba(255, 255, 255, 0.05)", borderRadius: "8px", padding: "10px", margin: "0 auto 15px auto", fontSize: "11px", textAlign: "left", display: "inline-block", width: "100%", boxSizing: "border-box" }}>
+                                                <div style={{ marginBottom: "4px" }}><span style={{ color: "#94a3b8" }}>Employee ID:</span> <b style={{ float: "right" }}>{formData.employeeId || "EMP101"}</b></div>
+                                                <div style={{ marginBottom: "4px" }}><span style={{ color: "#94a3b8" }}>Department:</span> <b style={{ float: "right" }}>{formData.department || "Executive"}</b></div>
+                                                <div><span style={{ color: "#94a3b8" }}>Corporate Email:</span> <b style={{ float: "right" }}>{formData.email}</b></div>
+                                            </div>
+
+                                            {/* QR Code */}
+                                            <div style={{ background: "#ffffff", padding: "10px", borderRadius: "10px", display: "inline-block", boxShadow: "0 4px 10px rgba(0,0,0,0.15)", marginBottom: "10px" }}>
+                                                <img 
+                                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(
+                                                        `AMADOX ID\nName: ${formData.name}\nEmp ID: ${formData.employeeId}\nDept: ${formData.department}\nDesig: ${formData.designation}\nEmail: ${formData.email}`
+                                                    )}`}
+                                                    alt="Verification QR Code"
+                                                    style={{ width: "120px", height: "120px", display: "block" }}
+                                                />
+                                            </div>
+
+                                            <div style={{ fontSize: "9px", color: "#64748b", marginTop: "5px" }}>Confidential • Secured QR Verification</div>
+                                        </div>
+
+                                        {/* Action buttons */}
+                                        <button 
+                                            type="button" 
+                                            onClick={() => {
+                                                const printBadgeWindow = window.open("", "_blank");
+                                                printBadgeWindow.document.write(`
+                                                    <html>
+                                                        <head>
+                                                            <title>Print ID Badge - \${formData.name}</title>
+                                                            <style>
+                                                                body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #ffffff; }
+                                                                @media print {
+                                                                    body { background: none; }
+                                                                }
+                                                            </style>
+                                                        </head>
+                                                        <body>
+                                                            \${document.getElementById("corporate-id-badge").outerHTML}
+                                                            <script>
+                                                                window.onload = function() { window.print(); window.close(); }
+                                                            </script>
+                                                        </body>
+                                                    </html>
+                                                `);
+                                                printBadgeWindow.document.close();
+                                            }}
+                                            style={{ background: "#2563eb", color: "#ffffff", padding: "10px 20px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: "600", fontSize: "14px" }}
+                                        >
+                                            Print / Save ID Card PDF
+                                        </button>
                                     </div>
                                 </div>
                             )}

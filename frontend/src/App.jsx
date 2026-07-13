@@ -19,7 +19,8 @@ import Tasks from "./pages/Projects/Tasks";
 import Teams from "./pages/Projects/Teams";
 import Analytics from "./pages/Executive/Analytics";
 import Reports from "./pages/Reports/Reports";
-import Settings from "./pages/Settings/Settings";
+import ProfilePage from "./pages/Settings/Settings";
+import AccountSettings from "./pages/Settings/AccountSettings";
 import UserManagement from "./pages/Admin/UserManagement";
 import AuditLogs from "./pages/Admin/AuditLogs";
 import SystemConfig from "./pages/Admin/SystemConfig";
@@ -214,7 +215,16 @@ function App() {
                         path="/settings"
                         element={
                             <RoleProtectedRoute allowedRoles={allRoles}>
-                                <Settings />
+                                <AccountSettings />
+                            </RoleProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/profile"
+                        element={
+                            <RoleProtectedRoute allowedRoles={allRoles}>
+                                <ProfilePage />
                             </RoleProtectedRoute>
                         }
                     />
