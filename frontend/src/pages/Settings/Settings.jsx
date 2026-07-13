@@ -792,7 +792,7 @@ function Settings() {
                                                 printBadgeWindow.document.write(`
                                                     <html>
                                                         <head>
-                                                            <title>Print ID Badge - \${formData.name}</title>
+                                                            <title>Print ID Badge - ${formData.name}</title>
                                                             <style>
                                                                 body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #ffffff; }
                                                                 @media print {
@@ -801,7 +801,7 @@ function Settings() {
                                                             </style>
                                                         </head>
                                                         <body>
-                                                            \${document.getElementById("corporate-id-badge").outerHTML}
+                                                            ${document.getElementById("corporate-id-badge").outerHTML}
                                                             <script>
                                                                 window.onload = function() { window.print(); window.close(); }
                                                             </script>
