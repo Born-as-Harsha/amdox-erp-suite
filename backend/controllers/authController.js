@@ -51,7 +51,7 @@ const sendSmsOtp = async (phone, otpCode) => {
 // =====================================
 export const registerUser = async (req, res) => {
     try {
-        const { employeeId, username, name, email, phone, password, confirmPassword, department, designation, role, profilePicture, gender, dateOfBirth, address, emergencyContact, language, bio } = req.body;
+        const { employeeId, username, name, email, personalEmail, phone, password, confirmPassword, department, designation, role, profilePicture, gender, dateOfBirth, address, emergencyContact, language, bio } = req.body;
 
         if (!employeeId || !username || !name || !email || !password) {
             return res.status(400).json({ message: "Mandatory fields are missing." });
@@ -91,6 +91,7 @@ export const registerUser = async (req, res) => {
             username,
             name,
             email,
+            personalEmail: personalEmail || "",
             phone: phone || "",
             password: hashedPassword,
             role: userRole,
@@ -125,6 +126,7 @@ export const registerUser = async (req, res) => {
         await OTP.findOneAndUpdate(
             { email: user.email },
             { 
+                phone: user.phone || "",
                 otpCode: hashedOtp, 
                 expiresAt: new Date(Date.now() + 5 * 60 * 1000), 
                 attempts: 0, 
@@ -170,10 +172,11 @@ export const loginUser = async (req, res) => {
     try {
         const { emailOrUsername, password, rememberMe } = req.body;
 
-        // Find user by email OR username OR phone OR employeeId
+        // Find user by email OR personalEmail OR username OR phone OR employeeId
         const user = await User.findOne({
             $or: [
                 { email: emailOrUsername },
+                { personalEmail: emailOrUsername },
                 { username: emailOrUsername },
                 { employeeId: emailOrUsername },
                 { phone: emailOrUsername }
@@ -209,6 +212,7 @@ export const loginUser = async (req, res) => {
             await OTP.findOneAndUpdate(
                 { email: user.email },
                 { 
+                    phone: user.phone || "",
                     otpCode: hashedOtp, 
                     expiresAt: new Date(Date.now() + 5 * 60 * 1000), 
                     attempts: 0, 
@@ -317,6 +321,7 @@ export const verifyOtp = async (req, res) => {
         // OTP Verified, delete DB record
         await OTP.deleteOne({ email });
 
+        const wasPending = user.status === "Pending Verification";
         user.otpCode = "";
         user.otpExpires = undefined;
         user.otpVerified = true;
@@ -356,6 +361,7 @@ export const verifyOtp = async (req, res) => {
         });
 
         res.status(200).json({
+            message: wasPending ? "Registration is successful" : "Identity verified! Welcome to ERP Suite.",
             _id: user._id,
             name: user.name,
             email: user.email,
@@ -419,6 +425,7 @@ export const forgotPassword = async (req, res) => {
         const user = await User.findOne({
             $or: [
                 { email: emailOrPhone.toLowerCase() },
+                { personalEmail: emailOrPhone.toLowerCase() },
                 { phone: emailOrPhone }
             ]
         });
@@ -434,6 +441,7 @@ export const forgotPassword = async (req, res) => {
         await OTP.findOneAndUpdate(
             { email: user.email },
             { 
+                phone: user.phone || "",
                 otpCode: hashedOtp, 
                 expiresAt: new Date(Date.now() + 5 * 60 * 1000), 
                 attempts: 0, 

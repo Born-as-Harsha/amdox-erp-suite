@@ -25,6 +25,7 @@ function Register() {
         username: "",
         name: "",
         email: "",
+        personalEmail: "",
         phone: "",
         password: "",
         confirmPassword: "",
@@ -117,7 +118,7 @@ function Register() {
                 localStorage.setItem("user", JSON.stringify(data));
                 loginUserContext(data);
 
-                toast.success("Verification Successful! Logged in automatically.");
+                toast.success(data.message || "Registration is successful");
                 navigate("/dashboard", { replace: true });
             } catch (err) {
                 toast.error(err.message || "Invalid or expired OTP code.");
@@ -305,6 +306,19 @@ function Register() {
                                             />
                                         </div>
                                         {errors.email && <span className="error-text">{errors.email}</span>}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Personal Email Address</label>
+                                        <div className="input-box">
+                                            <FaEnvelope className="input-icon" />
+                                            <input
+                                                type="email"
+                                                placeholder="john.doe@personal.com"
+                                                value={formData.personalEmail || ""}
+                                                onChange={(e) => setFormData({ ...formData, personalEmail: e.target.value })}
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="form-group">

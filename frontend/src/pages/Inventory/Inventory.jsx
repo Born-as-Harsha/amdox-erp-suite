@@ -291,7 +291,7 @@ function Inventory() {
                 <div className="erp-card inv-metric-card">
                     <h3>Total Products</h3>
                     <h2>{metrics.totalProducts}</h2>
-                    <small>Skus listed</small>
+                    <small>SKUs Listed</small>
                 </div>
                 <div className="erp-card inv-metric-card">
                     <h3>Categories</h3>

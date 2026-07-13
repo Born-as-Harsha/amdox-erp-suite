@@ -7,6 +7,10 @@ const otpSchema = new mongoose.Schema(
             required: true,
             unique: true
         },
+        phone: {
+            type: String,
+            default: ""
+        },
         otpCode: {
             type: String,
             required: true

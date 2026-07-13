@@ -16,6 +16,7 @@ function UserManagement() {
         employeeId: "",
         name: "",
         email: "",
+        personalEmail: "",
         phone: "",
         password: "",
         role: "Employee",
@@ -69,6 +70,7 @@ function UserManagement() {
             employeeId: user.employeeId || "",
             name: user.name || "",
             email: user.email || "",
+            personalEmail: user.personalEmail || "",
             phone: user.phone || "",
             password: "", // do not fill password on edit
             role: user.role || "Employee",
@@ -438,7 +440,14 @@ function UserManagement() {
                                 <tr key={user._id}>
                                     <td><strong>{user.employeeId}</strong></td>
                                     <td>{user.name}</td>
-                                    <td>{user.email}</td>
+                                    <td>
+                                        <div>{user.email}</div>
+                                        {user.personalEmail && (
+                                            <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}>
+                                                Personal: {user.personalEmail}
+                                            </div>
+                                        )}
+                                    </td>
                                     <td>
                                         <span className="erp-badge primary">{user.role}</span>
                                     </td>
@@ -565,6 +574,17 @@ function UserManagement() {
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     placeholder="john@amdox.com"
+                                />
+                            </div>
+
+                            <div className="erp-form-group">
+                                <label>Personal Email</label>
+                                <input
+                                    type="email"
+                                    className="erp-input"
+                                    value={formData.personalEmail || ""}
+                                    onChange={(e) => setFormData({ ...formData, personalEmail: e.target.value })}
+                                    placeholder="john@personal.com"
                                 />
                             </div>
 
