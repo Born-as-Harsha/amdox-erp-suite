@@ -346,17 +346,17 @@ function Login() {
 
             {/* Right Panel: Clean Professional Login Form */}
             <div className="login-right-form">
-                {/* Top Lang Selector */}
-                <div className="form-lang-switcher">
-                    <FaGlobe className="lang-globe-icon" />
-                    <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-                        <option value="en">English (US)</option>
-                        <option value="es">Español</option>
-                        <option value="fr">Français</option>
-                    </select>
-                </div>
-
                 <div className="login-form-wrapper">
+                    {/* Top Lang Selector */}
+                    <div className="form-lang-switcher">
+                        <FaGlobe className="lang-globe-icon" />
+                        <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+                            <option value="en">English (US)</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                        </select>
+                    </div>
+
                     <div className="form-header-badge">AMADOX ERP GATEWAY</div>
                     <h2>Secure Sign In</h2>
                     <p className="gateway-desc">Enter your enterprise credentials and pass verification to enter the ERP portal.</p>
