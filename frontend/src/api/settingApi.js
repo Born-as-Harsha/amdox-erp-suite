@@ -1,24 +1,6 @@
-import axios from "axios";
+import api from "../services/api";
 
-const API = axios.create({
-    baseURL: "http://localhost:5000/api"
-});
-
-API.interceptors.request.use((config) => {
-
-    const token = localStorage.getItem("token");
-
-    if (token) {
-
-        config.headers.Authorization = `Bearer ${token}`;
-
-    }
-
-    return config;
-
-});
-
-export const getProfile = () => API.get("/settings");
+export const getProfile = () => api.get("/settings");
 
 export const updateProfile = (data) =>
-    API.put("/settings", data);
+    api.put("/settings", data);

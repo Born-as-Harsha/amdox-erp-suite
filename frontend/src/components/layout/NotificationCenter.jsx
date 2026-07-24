@@ -65,7 +65,7 @@ function NotificationCenter() {
         fetchNotifications();
 
         const token = localStorage.getItem("token");
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+        const apiUrl = import.meta.env.VITE_API_URL || "https://amdox-erp-suite.onrender.com/api";
         const cleanUrl = apiUrl.replace(/\/api$/, "");
         
         // Establish EventSource link passing auth token in query string

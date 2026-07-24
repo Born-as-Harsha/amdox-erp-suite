@@ -1,29 +1,11 @@
-import axios from "axios";
+import api from "../services/api";
 
-const API = axios.create({
-    baseURL: "http://localhost:5000/api"
-});
+export const getEmployees = () => api.get("/employees");
 
-API.interceptors.request.use((config) => {
+export const getInventory = () => api.get("/inventory");
 
-    const token = localStorage.getItem("token");
+export const getProjects = () => api.get("/projects");
 
-    if (token) {
+export const getReports = () => api.get("/reports");
 
-        config.headers.Authorization = `Bearer ${token}`;
-
-    }
-
-    return config;
-
-});
-
-export const getEmployees = () => API.get("/employees");
-
-export const getInventory = () => API.get("/inventory");
-
-export const getProjects = () => API.get("/projects");
-
-export const getReports = () => API.get("/reports");
-
-export const getFinanceStats = () => API.get("/finance/stats");
+export const getFinanceStats = () => api.get("/finance/stats");

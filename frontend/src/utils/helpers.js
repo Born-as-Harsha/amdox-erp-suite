@@ -45,7 +45,7 @@ export const convertImageToBase64 = (file, options = { maxSizeMB: 2 }) => {
 export const getAvatarUrl = (path) => {
     if (!path) return "";
     if (path.startsWith("data:image")) return path;
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+    const apiUrl = import.meta.env.VITE_API_URL || "https://amdox-erp-suite.onrender.com/api";
     const baseUrl = apiUrl.replace(/\/api$/, "");
     return `${baseUrl}${path}`;
 };

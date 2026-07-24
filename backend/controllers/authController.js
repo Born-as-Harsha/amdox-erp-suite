@@ -224,6 +224,13 @@ export const loginUser = async (req, res) => {
             // Send Twilio SMS and email
             await sendSmsOtp(user.phone || "7901446220", otpCode);
 
+            await sendEmail({
+                to: user.email,
+                subject: "AMADOX ERP - Multi-Factor Verification Code",
+                text: `Hello ${user.name}! Your OTP code for login is: ${otpCode}. It expires in 5 minutes.`,
+                html: `<h3>MFA Verification Code</h3><p>Hello <b>${user.name}</b>,</p><p>Your login OTP code is: <b style="font-size:18px;color:#2563eb;">${otpCode}</b>.</p><p>It will expire in 5 minutes.</p>`
+            });
+
             // Print OTP to Node Console for backup verification
             console.log(`\n======================================\n[MOCK SMS & EMAIL DISPATCH]\nTO: ${user.email}\nSMS PHONE: ${user.phone || "7901446220"}\nSUBJECT: AMADOX ERP OTP VERIFICATION CODE\nOTP CODE: ${otpCode}\n======================================\n`);
 
